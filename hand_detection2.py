@@ -89,8 +89,7 @@ for word in os.listdir(IMAGE_PATHS):
             xmin, xmax, ymin, ymax = box['xmin'], box['xmax'], box['ymin'], box['ymax']
             xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-            save_path = IMAGE_PATHS+word+'/'+image_name.split('.jpg')[0]+'hand_'+str(count) +'.jpg'
+            save_path = IMAGE_PATHS+word+'_hand/'+image_name.split('.jpg')[0]+'hand_'+str(count) +'.jpg'
 
             cv2.imwrite(save_path, image_np[ymin:ymax, xmin:xmax, :])
-            cv2.imwrite('hand_infer.jpg', image_np_with_detections)
             count +=1
