@@ -68,7 +68,7 @@ for image_path in IMAGE_PATHS:
     label_id_offset = 1
     image_np_with_detections = image_np.copy()
 
-    ymin, xmin, ymax, xmax = result = viz_utils.visualize_boxes_and_labels_on_image_array(
+    bouding_boxes = result = viz_utils.visualize_boxes_and_labels_on_image_array(
             image_np_with_detections,
             detections['detection_boxes'],
             detections['detection_classes']+label_id_offset,
@@ -80,7 +80,12 @@ for image_path in IMAGE_PATHS:
             agnostic_mode=False)
 
     im_width, im_height = image_np.shape[1], image_np.shape[0]
-    xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-    cv2.imwrite('just_hand.jpg', image_np[ymin:ymax, xmin:xmax, :])
-    cv2.imwrite('hand_infer.jpg', image_np_with_detections)
+    count = 0
+    for box in bouding_boxes:
+        xmin, xmax, ymin, ymax = box['xmin'], box['xmax'], box['ymin'], box['ymax']
+        xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
+
+        cv2.imwrite('just_hand_' +str(count)+'.jpg', image_np[ymin:ymax, xmin:xmax, :])
+        cv2.imwrite('hand_infer.jpg', image_np_with_detections)
+        count +=1
