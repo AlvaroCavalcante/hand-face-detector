@@ -9,16 +9,14 @@ import cv2
 from utils import label_map_util
 from utils import visualization_utils_color as vis_util
 
-from imutils.video import FPS
-from imutils.video import WebcamVideoStream
+# from imutils.video import FPS
+# from imutils.video import WebcamVideoStream
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+import matplotlib.pyplot as plt 
 
-
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = './model/frozen_inference_graph.pb'
-
-# List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = './proto/label_map.pbtxt'
-
 NUM_CLASSES = 1
 
 # Loading label map
@@ -33,7 +31,7 @@ def face_detection():
     detection_graph = tf.Graph()
     with detection_graph.as_default():
         od_graph_def = tf.GraphDef()
-        with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
+        with tf.io.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
             serialized_graph = fid.read()
             od_graph_def.ParseFromString(serialized_graph)
             tf.import_graph_def(od_graph_def, name='')
@@ -54,42 +52,33 @@ def face_detection():
     num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
     # Start video stream
-    cap = WebcamVideoStream(0).start()
-    fps = FPS().start()
+    # cap = WebcamVideoStream(0).start()
+    # fps = FPS().start()
 
-    while True:
+    image = cv2.imread('/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS/train/carro/VID_20201011_1441422020-10-18 10:42:55.169150.jpg')
+    original_image = image.copy()
 
-        frame = cap.read()
+    expanded_frame = np.expand_dims(image, axis=0)
+    (boxes, scores, classes, num_c) = sess.run(
+        [detection_boxes, detection_scores, detection_classes, num_detections],
+        feed_dict={image_tensor: expanded_frame})
 
-        # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-        expanded_frame = np.expand_dims(frame, axis=0)
-        (boxes, scores, classes, num_c) = sess.run(
-            [detection_boxes, detection_scores, detection_classes, num_detections],
-            feed_dict={image_tensor: expanded_frame})
+    ymin, xmin, ymax, xmax = vis_util.visualize_boxes_and_labels_on_image_array(
+        image,
+        np.squeeze(boxes),
+        np.squeeze(classes).astype(np.int32),
+        np.squeeze(scores),
+        category_index,
+        use_normalized_coordinates=True,
+        line_thickness=2,
+        min_score_thresh=0.40)
 
-        # Visualization of the detection
-        vis_util.visualize_boxes_and_labels_on_image_array(
-            frame,
-            np.squeeze(boxes),
-            np.squeeze(classes).astype(np.int32),
-            np.squeeze(scores),
-            category_index,
-            use_normalized_coordinates=True,
-            line_thickness=2,
-            min_score_thresh=0.40)
+    im_width, im_height = image.shape[1], image.shape[0]
+    xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-        cv2.imshow('Detection', frame)
-        fps.update()
+    cv2.imwrite('./results/face.jpg', original_image[ymin:ymax, xmin:xmax, :])
+    # cv2.imwrite('./results/test.jpg', image)
 
-        if cv2.waitKey(1) == ord('q'):
-            fps.stop()
-            break
-
-    print("Fps: {:.2f}".format(fps.fps()))
-    fps.update()
-    cap.stop()
-    cv2.destroyAllWindows()
-
-
+    
 if __name__ == '__main__':
     face_detection()
