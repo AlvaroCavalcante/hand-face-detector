@@ -16,7 +16,7 @@ from object_detection.builders import model_builder
 
 PATH_TO_CFG = "./pipeline.config"
 PATH_TO_CKPT = "./checkpoint"
-PATH_TO_LABELS = '/home/alvaro/Downloads/label_map.pbtxt'
+PATH_TO_LABELS = './label_map.pbtxt'
 IMAGE_PATHS = glob.glob('./hand_images/*.jpg')
 
 print('Loading model... ', end='')
