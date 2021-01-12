@@ -20,7 +20,7 @@ os.environ["PYTHONPATH"] = '/home/alvaro/Área de Trabalho/models/research'
 PATH_TO_CFG = "./pipeline.config"
 PATH_TO_CKPT = "./checkpoint"
 PATH_TO_LABELS = './label_map.pbtxt'
-IMAGE_PATHS = '/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS hand/train/'
+IMAGE_PATHS = '/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS hand/test/'
 
 print('Loading model... ', end='')
 
@@ -45,6 +45,13 @@ def detect_fn(image):
 def load_image_into_numpy_array(path):
     return np.array(Image.open(path))
 
+def get_save_path(word, image_name, count):
+    save_path = '/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS hand/test_hand/'
+    if word+'_hand' not in os.listdir(save_path):
+        os.mkdir(save_path+word+'_hand')
+
+    save_path += word+'_hand/'+image_name.split('.jpg')[0]+'hand_'+str(count) +'.jpg'
+    return save_path
 
 category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS,
                                                                     use_display_name=True)
@@ -88,13 +95,19 @@ for word in os.listdir(IMAGE_PATHS):
         count = 0
 
         for box in bouding_boxes:
+            if count == 2:
+                break
+
             xmin, xmax, ymin, ymax = box['xmin'], box['xmax'], box['ymin'], box['ymax']
             xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-            save_path = '/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS hand/train_hand/'
-            if word+'_hand' not in os.listdir(save_path):
-                os.mkdir(save_path+word+'_hand')
-
-            save_path += word+'_hand/'+image_name.split('.jpg')[0]+'hand_'+str(count) +'.jpg'
+            save_path = get_save_path(word, image_name, count)
             cv2.imwrite(save_path, image_np[ymin:ymax, xmin:xmax, :])
             count +=1
+
+        while count < 2:
+            black_img = np.zeros((224,224))
+            save_path = get_save_path(word, image_name, count)
+            cv2.imwrite(save_path, black_img)
+            count +=1 
+        
