@@ -14,6 +14,9 @@ from object_detection.utils import config_util
 from object_detection.utils import visualization_utils as viz_utils
 from object_detection.builders import model_builder
 
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["PYTHONPATH"] = '/home/alvaro/Área de Trabalho/models/research'
+
 PATH_TO_CFG = "./pipeline.config"
 PATH_TO_CKPT = "./checkpoint"
 PATH_TO_LABELS = './label_map.pbtxt'
@@ -48,7 +51,6 @@ category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABE
 
 for word in os.listdir(IMAGE_PATHS):
     for image_name in os.listdir(IMAGE_PATHS+word):
-        print('Running inference for {}... '.format(image_name), end='')
 
         image_path = IMAGE_PATHS+word+'/'+image_name
         image_np = load_image_into_numpy_array(image_path)
@@ -89,7 +91,10 @@ for word in os.listdir(IMAGE_PATHS):
             xmin, xmax, ymin, ymax = box['xmin'], box['xmax'], box['ymin'], box['ymax']
             xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-            save_path = IMAGE_PATHS+word+'_hand/'+image_name.split('.jpg')[0]+'hand_'+str(count) +'.jpg'
+            save_path = '/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS hand/train_hand/'
+            if word+'_hand' not in os.listdir(save_path):
+                os.mkdir(save_path+word+'_hand')
 
+            save_path += word+'_hand/'+image_name.split('.jpg')[0]+'hand_'+str(count) +'.jpg'
             cv2.imwrite(save_path, image_np[ymin:ymax, xmin:xmax, :])
             count +=1
