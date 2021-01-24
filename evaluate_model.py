@@ -183,9 +183,9 @@ def evaluate_model_without_generator():
     final_labels = []
     label_map = get_label_map()
 
-    for start in range(0, len(final_list), 32):
+    for start in range(0, len(final_list), 128):
         print('Remaining images', len(final_list) - start)
-        end = min(start + 32, 3767)
+        end = min(start + 128, 3767)
         images_and_labels = np.array([get_image_and_label(image_path, label_map) for image_path in final_list[start:end]])
         read_imgs = images_and_labels[:, 0]
         labels = images_and_labels[:, 1]
