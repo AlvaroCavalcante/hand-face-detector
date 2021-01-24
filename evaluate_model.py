@@ -10,7 +10,7 @@ from itertools import chain
 from tensorflow import keras
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from sklearn import accuracy_score
+from sklearn.metrics import accuracy_score
 
 import tensorflow as tf
 
@@ -55,6 +55,24 @@ def detect_fn(image):
     detections = detection_model.postprocess(prediction_dict, shapes)
 
     return detections
+
+def get_label_map():
+	train_datagen = ImageDataGenerator()
+	generator = train_datagen.flow_from_directory(
+		'/home/alvaro/Documentos/projeto libras/frame dataset/validation', batch_size=1)
+	y_true_labels = generator.classes
+	y_class_name = generator.filenames
+
+	labels = {}
+
+	count = 0
+	for class_number in y_true_labels:
+		if labels.get(class_number) == None:
+			labels[y_class_name[count].split('/')[0]] = class_number
+
+		count += 1
+
+	return labels
 
 
 def load_image_into_numpy_array(path):
@@ -156,9 +174,18 @@ def custom_generator():
         # yield np.array([img1, img2, img3])# , tf.cast(output[1], tf.int32)
         yield img1, img2, img3
 
-def read_image(image_path):
+def get_image_and_label(image_path):
     image = np.array(Image.open(image_path))
-    return image
+    label = get_label(image_path)
+    return image, label
+
+def get_label(image_path):
+    splitted_path = image_path.split('/')
+    folder = splitted_path[len(splitted_path) - 2]
+    labels = get_label_map()
+    label = labels[folder]
+    return label
+
 
 class CustomGenerator(keras.utils.Sequence):
     def __init__(self, img_path_list, batch_size):
@@ -171,7 +198,7 @@ class CustomGenerator(keras.utils.Sequence):
     def __getitem__(self, idx):
         for start in range(0, len(self.image_path_list), self.batch_size):
             end = min(start + self.batch_size, 3767)
-            read_imgs = np.array([read_image(image_path) for image_path in self.image_path_list[start:end]])
+            read_imgs, labels = np.array([get_image_and_label(image_path) for image_path in self.image_path_list[start:end]])
             final_image = []
             for image in read_imgs:
                 final_image.append(detect_hand(image))
@@ -188,7 +215,7 @@ final_pred = []
 
 for start in range(0, len(final_list), 2):
     end = min(start + 2, 3767)
-    read_imgs = np.array([read_image(image_path) for image_path in final_list[start:end]])
+    read_imgs, labels = np.array([get_image_and_label(image_path) for image_path in final_list[start:end]])
     final_image = []
     for image in read_imgs:
         final_image.append(detect_hand(image))
