@@ -187,6 +187,7 @@ class CustomGenerator(keras.utils.Sequence):
     def __init__(self, img_path_list, batch_size):
         self.image_path_list = img_path_list 
         self.batch_size = batch_size
+        self.label_map = get_label_map()
 
     def __len__(self):
         return int(3767/ self.batch_size)
@@ -194,12 +195,14 @@ class CustomGenerator(keras.utils.Sequence):
     def __getitem__(self, idx):
         for start in range(0, len(self.image_path_list), self.batch_size):
             end = min(start + self.batch_size, 3767)
-            read_imgs, labels = np.array([get_image_and_label(image_path) for image_path in self.image_path_list[start:end]])
+            images_and_labels = np.array([get_image_and_label(image_path, self.label_map) for image_path in self.image_path_list[start:end]])
             final_image = []
+            read_imgs = images_and_labels[:, 0]
+            labels = images_and_labels[:, 1]
             for image in read_imgs:
                 final_image.append(detect_hand(image))
 
-            final_image = np.array(final_image)
+            final_image = np.array(final_image).astype('float32')
 
             img1 = final_image[:,0,:,:]    
             img2 = final_image[:,1,:,:]
@@ -207,39 +210,35 @@ class CustomGenerator(keras.utils.Sequence):
 
             return [img1, img2, img3], labels
 
-# custom = CustomGenerator(final_list, 32)
-# test_acc = model.evaluate(custom)
+def evaluate_model_without_generator():
+    final_pred = []
+    final_labels = []
+    label_map = get_label_map()
 
-final_pred = []
-final_labels = []
-label_map = get_label_map()
+    for start in range(0, len(final_list), 32):
+        print('Remaining images', len(final_list) - start)
+        end = min(start + 32, 3767)
+        images_and_labels = np.array([get_image_and_label(image_path, label_map) for image_path in final_list[start:end]])
+        read_imgs = images_and_labels[:, 0]
+        labels = images_and_labels[:, 1]
+        final_image = []
+        for image in read_imgs:
+            final_image.append(detect_hand(image))
 
-for start in range(0, len(final_list), 32):
-    print('Remaining images', len(final_list) - start)
-    end = min(start + 32, 3767)
-    images_and_labels = np.array([get_image_and_label(image_path, label_map) for image_path in final_list[start:end]])
-    read_imgs = images_and_labels[:, 0]
-    labels = images_and_labels[:, 1]
-    final_image = []
-    for image in read_imgs:
-        final_image.append(detect_hand(image))
+        final_image = np.array(final_image)
 
-    final_image = np.array(final_image)
+        img1 = final_image[:,0,:,:]    
+        img2 = final_image[:,1,:,:]
+        img3 = final_image[:,2,:,:]
+        pred = model.predict([img1, img2, img3])
+        final_pred.extend([np.argmax(p) for p in pred]) 
+        final_labels.extend(labels)
 
-    img1 = final_image[:,0,:,:]    
-    img2 = final_image[:,1,:,:]
-    img3 = final_image[:,2,:,:]
-    pred = model.predict([img1, img2, img3])
-    final_pred.extend([np.argmax(p) for p in pred]) 
-    final_labels.extend(labels)
+    acc = accuracy_score(final_labels, final_pred)
+    return acc
 
-acc = accuracy_score(final_labels, final_pred)
-print(acc)
+evaluate_model_without_generator()
 
-# g = custom_generator()
-# img = next(g)
-
-# test_steps = int(3767 / 5)
-# test_acc = model.evaluate(custom_generator, steps=test_steps)
-# print(test_acc)
+custom = CustomGenerator(final_list, 32)
+test_acc = model.evaluate(custom)
 
