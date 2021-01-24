@@ -151,30 +151,12 @@ def detect_hand(image):
 
 fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(15, 15))
 
-def custom_generator():
-    datagen = ImageDataGenerator()
-    aug_iter = datagen.flow_from_directory('/home/alvaro/Documentos/projeto libras/frame dataset/validation',
-                                       target_size=[224, 224], batch_size=5, class_mode='sparse')
-
-    while True:
-        output = aug_iter.next()
-        final_image = []
-        for image in output[0]:
-            final_image.append(detect_hand(image))
-
-        final_image = np.array(final_image)
-
-        img1 = final_image[:,0,:,:]    
-        img2 = final_image[:,1,:,:]
-        img3 = final_image[:,2,:,:]
-        pred = model.predict([img1, img2, img3])
-        # yield np.array([img1, img2, img3])# , tf.cast(output[1], tf.int32)
-        yield img1, img2, img3
 
 def get_image_and_label(image_path, label_map):
     image = np.array(Image.open(image_path))
     label = get_label(image_path, label_map)
     return image, label
+
 
 def get_label(image_path, label_map):
     splitted_path = image_path.split('/')
@@ -182,33 +164,6 @@ def get_label(image_path, label_map):
     label = label_map[folder]
     return label
 
-
-class CustomGenerator(keras.utils.Sequence):
-    def __init__(self, img_path_list, batch_size):
-        self.image_path_list = img_path_list 
-        self.batch_size = batch_size
-        self.label_map = get_label_map()
-
-    def __len__(self):
-        return int(3767/ self.batch_size)
-
-    def __getitem__(self, idx):
-        for start in range(0, len(self.image_path_list), self.batch_size):
-            end = min(start + self.batch_size, 3767)
-            images_and_labels = np.array([get_image_and_label(image_path, self.label_map) for image_path in self.image_path_list[start:end]])
-            final_image = []
-            read_imgs = images_and_labels[:, 0]
-            labels = images_and_labels[:, 1]
-            for image in read_imgs:
-                final_image.append(detect_hand(image))
-
-            final_image = np.array(final_image).astype('float32')
-
-            img1 = final_image[:,0,:,:]    
-            img2 = final_image[:,1,:,:]
-            img3 = final_image[:,2,:,:]
-
-            return [img1, img2, img3], labels
 
 def evaluate_model_without_generator():
     final_pred = []
@@ -238,7 +193,4 @@ def evaluate_model_without_generator():
     return acc
 
 evaluate_model_without_generator()
-
-custom = CustomGenerator(final_list, 32)
-test_acc = model.evaluate(custom)
 
