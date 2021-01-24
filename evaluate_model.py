@@ -149,21 +149,34 @@ def detect_hand(image):
         hands[0], [224, 224]), tf.image.resize(hands[1], [224, 224])])
     return stacked_img
 
-fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(15, 15))
-
 
 def get_image_and_label(image_path, label_map):
     image = np.array(Image.open(image_path))
-    label = get_label(image_path, label_map)
-    return image, label
+    label, folder = get_label(image_path, label_map)
+    hand_search_path = '/home/alvaro/Documentos/projeto libras/frame dataset/validation_hand/'+folder+'_hand/'
+    hands = get_hands_path(hand_search_path, image_path)
+    stacked_img = np.stack([tf.image.resize(image, [224,224]), tf.image.resize(
+        hands[0], [224, 224]), tf.image.resize(hands[1], [224, 224])])
+
+    return stacked_img, label
 
 
 def get_label(image_path, label_map):
     splitted_path = image_path.split('/')
     folder = splitted_path[len(splitted_path) - 2]
     label = label_map[folder]
-    return label
+    return label, folder
 
+
+def get_hands_path(search_path, image_path):
+    hands = []    
+    image_name = image_path.split('/')[-1].split('.jpg')[0]
+
+    for i in range(2):
+        hand_image_name = image_name+'hand_'+str(i)+'.jpg'
+        hands.append(np.array(Image.open(search_path+hand_image_name)))
+
+    return hands
 
 def evaluate_model_without_generator():
     final_pred = []
@@ -178,7 +191,7 @@ def evaluate_model_without_generator():
         labels = images_and_labels[:, 1]
         final_image = []
         for image in read_imgs:
-            final_image.append(detect_hand(image))
+            final_image.append(image)
 
         final_image = np.array(final_image)
 
