@@ -6,9 +6,11 @@ import os
 import cv2
 import time
 import glob
+from itertools import chain
 from tensorflow import keras
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from sklearn import accuracy_score
 
 import tensorflow as tf
 
@@ -26,6 +28,10 @@ PATH_TO_LABELS = './label_map.pbtxt'
 IMAGE_PATHS = '/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS hand/test/'
 
 save_hand_image = False
+
+base_path = '/home/alvaro/Documentos/projeto libras/frame dataset/validation/'
+image_path_list = [glob.glob(base_path+folder+'/*.jpg') for folder in os.listdir(base_path)] 
+final_list = list(chain(*image_path_list))
 
 print('Loading model... ', end='')
 
@@ -66,7 +72,7 @@ def get_save_path(word, image_name, count):
 
 
 def detect_hand(image):
-    image = image.reshape((224,224,3))
+    image = cv2.resize(image, dsize=(224,224)) #image.reshape((224,224,3))
 
     category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS,
                                                                         use_display_name=True)
@@ -146,17 +152,60 @@ def custom_generator():
         img1 = final_image[:,0,:,:]    
         img2 = final_image[:,1,:,:]
         img3 = final_image[:,2,:,:]
-        yield np.array([img1, img2, img3]), tf.cast(output[1], tf.int32)
+        pred = model.predict([img1, img2, img3])
+        # yield np.array([img1, img2, img3])# , tf.cast(output[1], tf.int32)
+        yield img1, img2, img3
 
-g = custom_generator()
-img, label = next(g)
+def read_image(image_path):
+    image = np.array(Image.open(image_path))
+    return image
 
-# for final_img in img:
-#     print(final_img)
+class CustomGenerator(keras.utils.Sequence):
+    def __init__(self, img_path_list, batch_size):
+        self.image_path_list = img_path_list 
+        self.batch_size = batch_size
 
-test_steps = int(3767 / 5)
+    def __len__(self):
+        return int(3767/ self.batch_size)
 
-test_acc = model.evaluate(custom_generator, steps=test_steps)
+    def __getitem__(self, idx):
+        for start in range(0, len(self.image_path_list), self.batch_size):
+            end = min(start + self.batch_size, 3767)
+            read_imgs = np.array([read_image(image_path) for image_path in self.image_path_list[start:end]])
+            final_image = []
+            for image in read_imgs:
+                final_image.append(detect_hand(image))
 
-print(test_acc)
+            final_image = np.array(final_image)
+
+            img1 = final_image[:,0,:,:]    
+            img2 = final_image[:,1,:,:]
+            img3 = final_image[:,2,:,:]
+
+            return [img1, img2, img3]
+
+final_pred = []
+
+for start in range(0, len(final_list), 2):
+    end = min(start + 2, 3767)
+    read_imgs = np.array([read_image(image_path) for image_path in final_list[start:end]])
+    final_image = []
+    for image in read_imgs:
+        final_image.append(detect_hand(image))
+
+    final_image = np.array(final_image)
+
+    img1 = final_image[:,0,:,:]    
+    img2 = final_image[:,1,:,:]
+    img3 = final_image[:,2,:,:]
+    pred = model.predict([img1, img2, img3])
+    final_pred.append(np.argmax(pred)) 
+
+
+# g = custom_generator()
+# img = next(g)
+
+# test_steps = int(3767 / 5)
+# test_acc = model.evaluate(custom_generator, steps=test_steps)
+# print(test_acc)
 
