@@ -20,7 +20,7 @@ os.environ["PYTHONPATH"] = '/home/alvaro/Área de Trabalho/models/research'
 PATH_TO_CFG = "./pipeline.config"
 PATH_TO_CKPT = "./checkpoint"
 PATH_TO_LABELS = './label_map.pbtxt'
-IMAGE_PATHS = '/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS hand/test/'
+IMAGE_PATHS = '/home/alvaro/Documentos/projeto libras/frame dataset/validation/'
 
 print('Loading model... ', end='')
 
@@ -46,7 +46,7 @@ def load_image_into_numpy_array(path):
     return np.array(Image.open(path))
 
 def get_save_path(word, image_name, count):
-    save_path = '/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS hand/test_hand/'
+    save_path = '/home/alvaro/Documentos/projeto libras/frame dataset/validation_hand/'
     if word+'_hand' not in os.listdir(save_path):
         os.mkdir(save_path+word+'_hand')
 
@@ -106,7 +106,7 @@ for word in os.listdir(IMAGE_PATHS):
             count +=1
 
         while count < 2:
-            black_img = np.zeros((224,224))
+            black_img = np.zeros((224,224, 3))
             save_path = get_save_path(word, image_name, count)
             cv2.imwrite(save_path, black_img)
             count +=1 
