@@ -19,9 +19,6 @@ from object_detection.utils import config_util
 from object_detection.utils import visualization_utils as viz_utils
 from object_detection.builders import model_builder
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-os.environ["PYTHONPATH"] = '/home/alvaro/Área de Trabalho/models/research'
-
 PATH_TO_CFG = "./pipeline.config"
 PATH_TO_CKPT = "./checkpoint"
 PATH_TO_LABELS = './label_map.pbtxt'
@@ -174,16 +171,15 @@ def custom_generator():
         # yield np.array([img1, img2, img3])# , tf.cast(output[1], tf.int32)
         yield img1, img2, img3
 
-def get_image_and_label(image_path):
+def get_image_and_label(image_path, label_map):
     image = np.array(Image.open(image_path))
-    label = get_label(image_path)
+    label = get_label(image_path, label_map)
     return image, label
 
-def get_label(image_path):
+def get_label(image_path, label_map):
     splitted_path = image_path.split('/')
     folder = splitted_path[len(splitted_path) - 2]
-    labels = get_label_map()
-    label = labels[folder]
+    label = label_map[folder]
     return label
 
 
@@ -209,13 +205,21 @@ class CustomGenerator(keras.utils.Sequence):
             img2 = final_image[:,1,:,:]
             img3 = final_image[:,2,:,:]
 
-            return [img1, img2, img3]
+            return [img1, img2, img3], labels
+
+# custom = CustomGenerator(final_list, 32)
+# test_acc = model.evaluate(custom)
 
 final_pred = []
+final_labels = []
+label_map = get_label_map()
 
-for start in range(0, len(final_list), 2):
-    end = min(start + 2, 3767)
-    read_imgs, labels = np.array([get_image_and_label(image_path) for image_path in final_list[start:end]])
+for start in range(0, len(final_list), 32):
+    print('Remaining images', len(final_list) - start)
+    end = min(start + 32, 3767)
+    images_and_labels = np.array([get_image_and_label(image_path, label_map) for image_path in final_list[start:end]])
+    read_imgs = images_and_labels[:, 0]
+    labels = images_and_labels[:, 1]
     final_image = []
     for image in read_imgs:
         final_image.append(detect_hand(image))
@@ -226,8 +230,11 @@ for start in range(0, len(final_list), 2):
     img2 = final_image[:,1,:,:]
     img3 = final_image[:,2,:,:]
     pred = model.predict([img1, img2, img3])
-    final_pred.append(np.argmax(pred)) 
+    final_pred.extend([np.argmax(p) for p in pred]) 
+    final_labels.extend(labels)
 
+acc = accuracy_score(final_labels, final_pred)
+print(acc)
 
 # g = custom_generator()
 # img = next(g)
