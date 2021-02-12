@@ -101,6 +101,9 @@ for word in os.listdir(IMAGE_PATHS):
             xmin, xmax, ymin, ymax = box['xmin'], box['xmax'], box['ymin'], box['ymax']
             xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
+            centroid = (int((xmin+xmax)/2), int((ymin+ymax)/2))
+            # centroid_detection = cv2.circle(image_np_with_detections, centroid, radius=5, color=(0, 0, 255), thickness=5)
+
             save_path = get_save_path(word, image_name, count)
             cv2.imwrite(save_path, image_np[ymin:ymax, xmin:xmax, :])
             count +=1
