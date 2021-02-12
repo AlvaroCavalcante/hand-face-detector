@@ -6,6 +6,7 @@ import os
 import cv2
 import time
 import glob 
+import math
 
 import tensorflow as tf
 
@@ -93,6 +94,7 @@ for word in os.listdir(IMAGE_PATHS):
         im_width, im_height = image_np.shape[1], image_np.shape[0]
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)  
         count = 0
+        centroids = []
 
         for box in bouding_boxes:
             if count == 2:
@@ -101,7 +103,7 @@ for word in os.listdir(IMAGE_PATHS):
             xmin, xmax, ymin, ymax = box['xmin'], box['xmax'], box['ymin'], box['ymax']
             xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-            centroid = (int((xmin+xmax)/2), int((ymin+ymax)/2))
+            centroids.append((int((xmin+xmax)/2), int((ymin+ymax)/2)))
             # centroid_detection = cv2.circle(image_np_with_detections, centroid, radius=5, color=(0, 0, 255), thickness=5)
 
             save_path = get_save_path(word, image_name, count)
@@ -113,4 +115,6 @@ for word in os.listdir(IMAGE_PATHS):
             save_path = get_save_path(word, image_name, count)
             cv2.imwrite(save_path, black_img)
             count +=1 
-        
+
+        if len(centroids) == 2:
+            distance = math.sqrt((centroids[1][0] - centroids[0][0])**2 + (centroids[1][1] - centroids[0][1])**2)
