@@ -92,6 +92,8 @@ for word in os.listdir(IMAGE_PATHS):
                 agnostic_mode=False)
 
         im_width, im_height = image_np.shape[1], image_np.shape[0]
+        final_im_width, final_im_height = 224, 224
+
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)  
         count = 0
         centroids = []
@@ -101,9 +103,11 @@ for word in os.listdir(IMAGE_PATHS):
                 break
 
             xmin, xmax, ymin, ymax = box['xmin'], box['xmax'], box['ymin'], box['ymax']
+
+            f_xmin, f_xmax, f_ymin, f_ymax = int(xmin * final_im_width), int(xmax * final_im_width), int(ymin * final_im_height), int(ymax * final_im_height)
             xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-            centroids.append((int((xmin+xmax)/2), int((ymin+ymax)/2)))
+            centroids.append((int((f_xmin+f_xmax)/2), int((f_ymin+f_ymax)/2)))
             # centroid_detection = cv2.circle(image_np_with_detections, centroid, radius=5, color=(0, 0, 255), thickness=5)
 
             save_path = get_save_path(word, image_name, count)
