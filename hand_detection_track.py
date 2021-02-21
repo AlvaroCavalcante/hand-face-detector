@@ -99,8 +99,19 @@ def detect_obj(frame, video):
         print('End of the video')
         sys.exit()
 
+def show_frame(frame):
+    cv2.imshow('detection', frame)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-loaded, frame = video.read()
+def get_initial_frame(video, frame_number):
+    for f in range(frame_number + 1):
+        loaded, frame = video.read()
+        if f == frame_number:
+            return loaded, frame
+
+loaded, frame = get_initial_frame(video, 30)
+
 tracker = cv2.TrackerCSRT_create()
 colors = (randint(0,255), randint(0,255), randint(0,255))
 
