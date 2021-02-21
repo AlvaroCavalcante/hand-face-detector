@@ -121,6 +121,8 @@ colors = []
 multi_tracker = cv2.MultiTracker_create()
 
 frame, original_frame, bboxes = detect_obj(frame, video)
+fps_rate = []
+count = 1
 
 for bbox in bboxes:
     w, h = (bbox[2] - bbox[0]), (bbox[3] - bbox[1])
@@ -147,9 +149,14 @@ while True:
             colors.append((randint(0,255), randint(0,255), randint(0,255)))
     
     fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
+    fps_rate.append(cv2.getTickFrequency() / (cv2.getTickCount() - timer))
+    mean = sum(fps_rate) / count
+
     cv2.putText(frame, 'FPS: ' + str(fps), (100, 50), cv2.FONT_HERSHEY_SIMPLEX, .75, (0,0,255), 2)
+    cv2.putText(frame, 'Mean FPS: ' + str(mean), (100, 80), cv2.FONT_HERSHEY_SIMPLEX, .75, (0,0,255), 2)
 
     cv2.imshow('Tracking', frame)
+    count += 1
     if cv2.waitKey(1) & 0XFF == 27:
         break
 
