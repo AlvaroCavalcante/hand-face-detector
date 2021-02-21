@@ -93,7 +93,7 @@ def detect_obj(frame, video):
         xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
         final_bbox.append((xmin, ymin, xmax, ymax))
     
-    if len(final_bbox) > 0:
+    if len(final_bbox) == 2:
         return frame, original_frame, final_bbox
     
     loaded, frame = video.read()
@@ -133,8 +133,7 @@ while True:
         break
 
     timer = cv2.getTickCount()
-
-    loaded, bbox = multi_tracker.update(frame)
+    loaded, bboxes = multi_tracker.update(frame)
 
     if loaded:
         for i, new_box in enumerate(bboxes):
