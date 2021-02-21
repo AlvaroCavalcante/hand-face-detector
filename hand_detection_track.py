@@ -53,7 +53,7 @@ def load_video(path):
     
     return video
 
-video = load_video('/home/alvaro/Documentos/projeto libras/excluded_videos/banco.mp4')
+video = load_video('/home/alvaro/Área de Trabalho/WLASL/start_kit/raw_videos/0ScBo3iRUhY.mkv')
   
 def detect_obj(frame, video):
     print('detecting object from detector')
@@ -110,13 +110,15 @@ def get_initial_frame(video, frame_number):
         if f == frame_number:
             return loaded, frame
 
-loaded, frame = get_initial_frame(video, 30)
-
+loaded, frame = get_initial_frame(video, 35)
+# show_frame(frame)
 tracker = cv2.TrackerCSRT_create()
 colors = (randint(0,255), randint(0,255), randint(0,255))
 
 frame, original_frame, bbox = detect_obj(frame, video)
-ok = tracker.init(original_frame, bbox)
+w, h = (bbox[2] - bbox[0]), (bbox[3] - bbox[1])
+
+ok = tracker.init(original_frame, (bbox[0], bbox[1], w, h))
 
 while True:
     loaded, frame = video.read()
@@ -138,7 +140,6 @@ while True:
     cv2.putText(frame, 'FPS: ' + str(fps), (100, 50), cv2.FONT_HERSHEY_SIMPLEX, .75, (0,0,255), 2)
 
     cv2.imshow('Tracking', frame)
-    k = cv2.waitKey(1) & 0XFF
-    if k == 27:
+    if cv2.waitKey(1) & 0XFF == 27:
         break
 
