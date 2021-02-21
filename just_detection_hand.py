@@ -8,7 +8,6 @@ import time
 import glob 
 import math
 from random import randint
-import sys 
 
 import tensorflow as tf
 
@@ -56,8 +55,7 @@ def load_video(path):
 
 video = load_video('/home/alvaro/Área de Trabalho/WLASL/start_kit/raw_videos/0ScBo3iRUhY.mkv')
   
-def detect_obj(frame, video):
-    print('detecting object from detector')
+def detect_obj(frame):
     input_tensor = tf.convert_to_tensor(np.expand_dims(frame, 0), dtype=tf.float32)
 
     detections = detect_fn(input_tensor)
@@ -85,20 +83,7 @@ def detect_obj(frame, video):
             min_score_thresh=.30,
             agnostic_mode=False)
 
-    im_width, im_height = frame.shape[1], frame.shape[0]
-
-    for box in bouding_boxes:     
-        xmin, xmax, ymin, ymax = box['xmin'], box['xmax'], box['ymin'], box['ymax']
-        xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
-        return frame, original_frame, (xmin, ymin, xmax, ymax)
-    
-    loaded, frame = video.read()
-
-    if loaded:
-        return detect_obj(frame, video)
-    else:
-        print('End of the video')
-        sys.exit()
+    return frame
 
 def show_frame(frame):
     cv2.imshow('detection', frame)
@@ -113,13 +98,7 @@ def get_initial_frame(video, frame_number):
 
 loaded, frame = get_initial_frame(video, 35)
 # show_frame(frame)
-tracker = cv2.TrackerCSRT_create()
-colors = (randint(0,255), randint(0,255), randint(0,255))
 
-frame, original_frame, bbox = detect_obj(frame, video)
-w, h = (bbox[2] - bbox[0]), (bbox[3] - bbox[1])
-
-ok = tracker.init(original_frame, (bbox[0], bbox[1], w, h))
 
 while True:
     loaded, frame = video.read()
@@ -128,14 +107,7 @@ while True:
 
     timer = cv2.getTickCount()
 
-    loaded, bbox = tracker.update(frame)
-
-    if loaded:
-        (x,y,w,h) = [int(v) for v in bbox]
-        cv2.rectangle(frame, (x,y), (x+w, y+h), colors, 2)
-    else:
-        frame, original_frame, bbox = detect_obj(frame, video)
-        tracker.init(original_frame, bbox)
+    frame = detect_obj(frame)
     
     fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
     cv2.putText(frame, 'FPS: ' + str(fps), (100, 50), cv2.FONT_HERSHEY_SIMPLEX, .75, (0,0,255), 2)
