@@ -6,26 +6,22 @@ import numpy as np
 import tensorflow as tf
 import cv2
 
-from utils import label_map_util
-from utils import visualization_utils_color as vis_util
+from object_detection.utils import visualization_utils as vis_util
+from object_detection.utils import label_map_util
 
-# from imutils.video import FPS
-# from imutils.video import WebcamVideoStream
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import matplotlib.pyplot as plt 
 
-PATH_TO_CKPT = './model/frozen_inference_graph.pb'
-PATH_TO_LABELS = './proto/label_map.pbtxt'
-NUM_CLASSES = 1
+def face_detection(image):
+    PATH_TO_CKPT = './model/frozen_inference_graph.pb'
+    PATH_TO_LABELS = './proto/label_map.pbtxt'
+    NUM_CLASSES = 1
 
-# Loading label map
-label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
-categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
-category_index = label_map_util.create_category_index(categories)
-
-
-def face_detection():
+    # Loading label map
+    label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
+    categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
+    category_index = label_map_util.create_category_index(categories)
 
     # Load Tensorflow model
     detection_graph = tf.Graph()
@@ -55,7 +51,6 @@ def face_detection():
     # cap = WebcamVideoStream(0).start()
     # fps = FPS().start()
 
-    image = cv2.imread('/home/alvaro/Documentos/projeto libras/frame dataset/20 FPS/train/carro/VID_20201011_1441422020-10-18 10:42:55.169150.jpg')
     original_image = image.copy()
 
     expanded_frame = np.expand_dims(image, axis=0)
@@ -63,7 +58,7 @@ def face_detection():
         [detection_boxes, detection_scores, detection_classes, num_detections],
         feed_dict={image_tensor: expanded_frame})
 
-    ymin, xmin, ymax, xmax = vis_util.visualize_boxes_and_labels_on_image_array(
+    bouding_boxes = vis_util.visualize_boxes_and_labels_on_image_array(
         image,
         np.squeeze(boxes),
         np.squeeze(classes).astype(np.int32),
@@ -71,14 +66,17 @@ def face_detection():
         category_index,
         use_normalized_coordinates=True,
         line_thickness=2,
-        min_score_thresh=0.40)
+        min_score_thresh=0.40)[0] # zero position
 
     im_width, im_height = image.shape[1], image.shape[0]
+
+    xmin, xmax, ymin, ymax = bouding_boxes['xmin'], bouding_boxes['xmax'], bouding_boxes['ymin'], bouding_boxes['ymax']
     xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-    cv2.imwrite('./results/face.jpg', original_image[ymin:ymax, xmin:xmax, :])
+    cv2.imwrite('./faces/face.jpg', original_image[ymin:ymax, xmin:xmax, :])
     # cv2.imwrite('./results/test.jpg', image)
 
     
 if __name__ == '__main__':
-    face_detection()
+    image = cv2.imread('/home/alvaro/Downloads/20 FPS/test/hospital/VID_20201011_1445172020-10-18 10:45:24.919016.jpg')
+    face_detection(image)

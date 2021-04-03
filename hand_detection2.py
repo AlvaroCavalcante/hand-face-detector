@@ -21,7 +21,7 @@ os.environ["PYTHONPATH"] = '/home/alvaro/Área de Trabalho/models/research'
 PATH_TO_CFG = "./pipeline.config"
 PATH_TO_CKPT = "./checkpoint"
 PATH_TO_LABELS = './label_map.pbtxt'
-IMAGE_PATHS = '/home/alvaro/Documentos/projeto libras/frame dataset/validation/'
+IMAGE_PATHS = '/home/alvaro/Downloads/20 FPS/test/'
 
 print('Loading model... ', end='')
 
@@ -47,7 +47,7 @@ def load_image_into_numpy_array(path):
     return np.array(Image.open(path))
 
 def get_save_path(word, image_name, count):
-    save_path = '/home/alvaro/Documentos/projeto libras/frame dataset/validation_hand/'
+    save_path = './hand_images/'
     if word+'_hand' not in os.listdir(save_path):
         os.mkdir(save_path+word+'_hand')
 
@@ -80,7 +80,7 @@ for word in os.listdir(IMAGE_PATHS):
         label_id_offset = 1
         image_np_with_detections = image_np.copy()
 
-        bouding_boxes = result = viz_utils.visualize_boxes_and_labels_on_image_array(
+        bouding_boxes = viz_utils.visualize_boxes_and_labels_on_image_array(
                 image_np_with_detections,
                 detections['detection_boxes'],
                 detections['detection_classes']+label_id_offset,
