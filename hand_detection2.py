@@ -92,10 +92,12 @@ for word in os.listdir(IMAGE_PATHS):
                 agnostic_mode=False)
 
         im_width, im_height = image_np.shape[1], image_np.shape[0]
-        final_im_width, final_im_height = 224, 224
+        final_im_width, final_im_height = image_np.shape[1], image_np.shape[0] # 224, 224
 
         from face_detection import detect_face
         face, centroid_face = detect_face(image_np)
+
+        centroid_detection = cv2.circle(image_np_with_detections, centroid_face, radius=5, color=(0, 0, 255), thickness=5)
 
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)  
         count = 0
@@ -111,7 +113,7 @@ for word in os.listdir(IMAGE_PATHS):
             xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
             centroids.append((int((f_xmin+f_xmax)/2), int((f_ymin+f_ymax)/2)))
-            # centroid_detection = cv2.circle(image_np_with_detections, centroid, radius=5, color=(0, 0, 255), thickness=5)
+            centroid_detection = cv2.circle(centroid_detection, centroids[count], radius=5, color=(0, 0, 255), thickness=5)
 
             save_path = get_save_path(word, image_name, count)
             cv2.imwrite(save_path, image_np[ymin:ymax, xmin:xmax, :])
@@ -123,5 +125,10 @@ for word in os.listdir(IMAGE_PATHS):
             cv2.imwrite(save_path, black_img)
             count +=1 
 
+        cv2.imwrite('centroids.jpg', centroid_detection)
+
         if len(centroids) == 2:
-            distance = math.sqrt((centroids[1][0] - centroids[0][0])**2 + (centroids[1][1] - centroids[0][1])**2)
+            distance_1 = math.sqrt((centroids[1][0] - centroids[0][0])**2 + (centroids[1][1] - centroids[0][1])**2)
+            distance_2 = math.sqrt((centroid_face[0] - centroids[0][0])**2 + (centroid_face[1] - centroids[0][1])**2)
+            distance_3 = math.sqrt((centroids[1][0] - centroid_face[0])**2 + (centroids[1][1] - centroid_face[1])**2)
+

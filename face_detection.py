@@ -68,12 +68,13 @@ def detect_face(image):
         min_score_thresh=0.40)[0] # zero position
 
     im_width, im_height = image.shape[1], image.shape[0]
-    final_im_width, final_im_height = 224, 224
+    final_im_width, final_im_height = image.shape[1], image.shape[0] #224, 224
 
     xmin, xmax, ymin, ymax = bouding_boxes['xmin'], bouding_boxes['xmax'], bouding_boxes['ymin'], bouding_boxes['ymax']
+    
+    f_xmin, f_xmax, f_ymin, f_ymax = int(xmin * final_im_width), int(xmax * final_im_width), int(ymin * final_im_height), int(ymax * final_im_height)
     xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-    f_xmin, f_xmax, f_ymin, f_ymax = int(xmin * final_im_width), int(xmax * final_im_width), int(ymin * final_im_height), int(ymax * final_im_height)
     centroid = (int((f_xmin+f_xmax)/2), int((f_ymin+f_ymax)/2))
 
     return original_image[ymin:ymax, xmin:xmax, :], centroid
