@@ -1,4 +1,3 @@
-
 import os
 import sys
 import time
@@ -13,7 +12,7 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import matplotlib.pyplot as plt 
 
-def face_detection(image):
+def detect_face(image):
     PATH_TO_CKPT = './model/frozen_inference_graph.pb'
     PATH_TO_LABELS = './proto/label_map.pbtxt'
     NUM_CLASSES = 1
@@ -73,10 +72,11 @@ def face_detection(image):
     xmin, xmax, ymin, ymax = bouding_boxes['xmin'], bouding_boxes['xmax'], bouding_boxes['ymin'], bouding_boxes['ymax']
     xmin, xmax, ymin, ymax = int(xmin * im_width), int(xmax * im_width), int(ymin * im_height), int(ymax * im_height)
 
-    cv2.imwrite('./faces/face.jpg', original_image[ymin:ymax, xmin:xmax, :])
+    return original_image[ymin:ymax, xmin:xmax, :]
+    # cv2.imwrite('./faces/face.jpg', original_image[ymin:ymax, xmin:xmax, :])
     # cv2.imwrite('./results/test.jpg', image)
 
     
 if __name__ == '__main__':
     image = cv2.imread('/home/alvaro/Downloads/20 FPS/test/hospital/VID_20201011_1445172020-10-18 10:45:24.919016.jpg')
-    face_detection(image)
+    detect_face(image)
