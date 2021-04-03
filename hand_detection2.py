@@ -94,6 +94,9 @@ for word in os.listdir(IMAGE_PATHS):
         im_width, im_height = image_np.shape[1], image_np.shape[0]
         final_im_width, final_im_height = 224, 224
 
+        from face_detection import detect_face
+        face = detect_face(image_np)
+
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)  
         count = 0
         centroids = []
