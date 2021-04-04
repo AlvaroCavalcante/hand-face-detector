@@ -125,6 +125,15 @@ for word in os.listdir(IMAGE_PATHS):
             cv2.imwrite(save_path, black_img)
             count +=1 
 
+        middle_base_x = int((centroids[0][0] + centroids[1][0]) / 2)
+        middle_base_y = int((centroids[0][1] + centroids[1][1]) / 2)
+
+        centroid_detection = cv2.circle(centroid_detection, (middle_base_x, middle_base_y), radius=5, color=(0, 0, 255), thickness=5)
+        
+        cv2.line(centroid_detection, (centroids[1][0], centroids[1][1]), (centroids[0][0], centroids[0][1]), (0, 255, 0), thickness=5)
+        cv2.line(centroid_detection, (centroids[1][0], centroids[1][1]), (centroid_face[0], centroid_face[1]), (0, 255, 0), thickness=5)
+        cv2.line(centroid_detection, (centroids[0][0], centroids[0][1]), (centroid_face[0], centroid_face[1]), (0, 255, 0), thickness=5)
+
         cv2.imwrite('centroids.jpg', centroid_detection)
 
         if len(centroids) == 2:
@@ -132,3 +141,10 @@ for word in os.listdir(IMAGE_PATHS):
             distance_2 = math.sqrt((centroid_face[0] - centroids[0][0])**2 + (centroid_face[1] - centroids[0][1])**2)
             distance_3 = math.sqrt((centroids[1][0] - centroid_face[0])**2 + (centroids[1][1] - centroid_face[1])**2)
 
+            perimeter = distance_1 + distance_2 + distance_3
+            semi_perimeter = perimeter / 2
+
+            area = math.sqrt((
+                semi_perimeter * (semi_perimeter - distance_1) * (semi_perimeter - distance_2) * (semi_perimeter - distance_3)))
+            # area = (distance_1 * (
+            #     math.sqrt(middle_base_x - centroid_face[0])**2 + (middle_base_y - centroid_face[1])**2)) / 2
