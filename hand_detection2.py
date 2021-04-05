@@ -154,3 +154,7 @@ for word in os.listdir(IMAGE_PATHS):
             ang_inter_a = get_angle(distance_3, distance_1, distance_2) 
             ang_inter_b = get_angle(distance_1, distance_2, distance_3)
             ang_inter_c = 180.0 - (ang_inter_a + ang_inter_b)
+
+            ang_ext_a = ang_inter_b + ang_inter_c
+            ang_ext_b = ang_inter_a + ang_inter_c
+            ang_ext_c = ang_inter_b + ang_inter_a
