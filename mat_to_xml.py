@@ -5,6 +5,7 @@ import os
 from os.path import isfile, join
 from xml.etree import ElementTree as et
 from xml.dom import minidom
+import argparse
 
 
 def get_img_size_node(img_path):
@@ -174,28 +175,29 @@ def make_int(box):
     return newbox
 
 
-def main():
-    # Read a .mat file and convert it to a pascal format
-    for directory in ['train','eval']:
+def main(args):
+    MAT_FILES_PATH = args.annotations_path
+    XML_FILES_PATH = args.output_path
+    IMG_FILES_PATH = args.img_path
 
-        if not os.path.exists('{}/annotations/xml'.format(directory)):
-            os.makedirs('{}/annotations/xml'.format(directory))
+    # List all files in the MAT_FILES_PATH and ignore hidden files (.DS_STORE for Macs)
+    mat_files = [[join(MAT_FILES_PATH, x), x] for x in os.listdir(MAT_FILES_PATH) if isfile(join(MAT_FILES_PATH, x)) and x[0] != '.']
+    mat_files.sort()
 
-        MAT_FILES_PATH = os.path.join(os.getcwd(), '{}/annotations/mat'.format(directory))
-        XML_FILES_PATH = os.path.join(os.getcwd(), '{}/annotations/xml'.format(directory))
-        IMG_FILES_PATH = os.path.join(os.getcwd(), '{}/images'.format(directory))
+    # Iterate through all files and convert them to XML
+    for mat_file in mat_files:
+        #print(mat_file)
+        read_mat_file(mat_file[0], mat_file[1],IMG_FILES_PATH, XML_FILES_PATH)
+        #break
 
-        # List all files in the MAT_FILES_PATH and ignore hidden files (.DS_STORE for Macs)
-        mat_files = [[join(MAT_FILES_PATH, x), x] for x in os.listdir(MAT_FILES_PATH) if isfile(join(MAT_FILES_PATH, x)) and x[0] is not '.']
-        mat_files.sort()
-	
-        # Iterate through all files and convert them to XML
-        for mat_file in mat_files:
-            #print(mat_file)
-            read_mat_file(mat_file[0], mat_file[1],IMG_FILES_PATH, XML_FILES_PATH)
-            #break
-        print(directory + " - successfully converted labels from mat to pascal-xml")
+    print('XML annotations generated sucessfully')
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--img-path', type=str)
+    parser.add_argument('--annotations-path', type=str)
+    parser.add_argument('--output-path', type=str)
+    args = parser.parse_args()
+
+    main(args)
