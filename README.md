@@ -28,3 +28,5 @@ The annotations are found in TXT format, and could be converted to XML by using 
 python3 convert_txt_to_xml.py
 ```
 This code was got from [this](https://github.com/MuhammadAsadJaved/Important-shells) open-source repo.
+
+**Note:** the "Autonomy" folder of this dataset is structured in multiple folders. To convert the annotations, first I used the script entitled "move_files.py" to centralize all the images and annotations.
