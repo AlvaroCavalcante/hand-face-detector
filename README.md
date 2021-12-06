@@ -37,3 +37,22 @@ python3 utils/dataset_split.py
 ```
 The default division proportion is 80/20, respectivelly. 
 
+### **Training the model**
+To train the object detector, the first step in to execute the model setup, by running the following script:
+
+```
+python3 hand_face_detector_setup.py --label_map_path /label_map.pbtxt --batch_size 50 --model_name "Your model name" --download_url http://tf-url.com
+```
+
+Where the model name and download url is taken from [TF Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md). 
+
+After the model setup, you just need to run the following code to start the detector training:
+```
+python /models/research/object_detection/model_main_tf2.py \
+    --pipeline_config_path={pipeline_fname} \
+    --model_dir={model_dir} \
+    --alsologtostderr \
+    --num_train_steps={num_steps} \
+    --checkpoint_every_n=1000 \
+    --num_eval_steps={num_eval_steps}
+```
