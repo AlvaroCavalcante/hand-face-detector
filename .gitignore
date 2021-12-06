@@ -6,3 +6,4 @@ faces/*
 __pycache__/*
 utils/__pycache__/*
 proto/__pycache__/*
+pretrained_model/*
