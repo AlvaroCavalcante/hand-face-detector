@@ -77,19 +77,19 @@ def main(args):
     batch_size = args.batch_size
 
     MODEL = args.model_name
-    DOWNLOAD_URL = args.download_path
+    DOWNLOAD_URL = args.download_url
     download_pretrained_model(MODEL, DOWNLOAD_URL)
 
-    use_coco_checkpoint = True
+    use_coco_checkpoint = args.use_coco_checkpoint
     if use_coco_checkpoint:
-        fine_tune_checkpoint = 'pretrained_model/' + os.listdir('pretrained_model')[0] + '/checkpoint/ckpt-0'
-        pipeline_fname = 'pretrained_model' +'/'+ os.listdir('pretrained_model')[0] + '/pipeline.config'
+        fine_tune_checkpoint = os.getcwd() + '/pretrained_model/' + os.listdir('pretrained_model')[0] + '/checkpoint/ckpt-0'
+        pipeline_fname = os.getcwd() + '/pretrained_model/' + os.listdir('pretrained_model')[0] + '/pipeline.config'
     else:
         fine_tune_checkpoint = args.fine_tune_path
         pipeline_fname = args.pipeline_file
 
-    train_record_fname = ''
-    test_record_fname = ''
+    train_record_fname = args.train_record_path
+    test_record_fname = args.test_record_path
 
     n_classes = get_num_classes(args.label_map_path)
     change_pipeline_config_values(num_steps=num_steps, num_eval_steps=num_eval_steps, batch_size=batch_size,
@@ -105,7 +105,10 @@ if __name__ == '__main__':
     parser.add_argument('--n_eval_steps', type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=10)
     parser.add_argument('--model_name', type=str)
-    parser.add_argument('--download_path', type=str)
+    parser.add_argument('--download_url', type=str)
+    parser.add_argument('--train_record_path', type=str)
+    parser.add_argument('--test_record_path', type=str)
+    parser.add_argument('--use_coco_checkpoint', type=bool, default=True)
     args = parser.parse_args()
 
     main(args)
