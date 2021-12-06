@@ -30,3 +30,10 @@ python3 utils/convert_txt_to_xml.py
 This code was got from [this](https://github.com/MuhammadAsadJaved/Important-shells) open-source repo.
 
 **Note:** the "Autonomy" folder of this dataset is structured in multiple folders. To convert the annotations, first I used the script entitled "move_files.py" to centralize all the images and annotations.
+
+After that, it's also necessary to convert the XML annotations and the images into TFRecords. To do so, first we need to centralize all the data in the train and test folders. It can be done by running the following code:
+```
+python3 utils/dataset_split.py
+```
+The default division proportion is 80/20, respectivelly. 
+
