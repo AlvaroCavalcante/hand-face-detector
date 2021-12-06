@@ -17,7 +17,7 @@ python3 utils/xml_to_csv.py -i /xml-path -o /csv-output-path
 ```
 Finally, it's necessary to convert the CSV files into TFRecord format to train the object detector using the TF Data API. To do so, just run the following code:
 ```
-python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=./label_map.pbtxt
+python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=./utils/label_map.pbtxt
 ```
 
 ## Hand and Face Dataset
