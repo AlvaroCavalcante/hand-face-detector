@@ -80,13 +80,15 @@ def main(args):
     DOWNLOAD_URL = args.download_url
     download_pretrained_model(MODEL, DOWNLOAD_URL)
 
-    use_coco_checkpoint = args.use_coco_checkpoint
-    if use_coco_checkpoint:
-        fine_tune_checkpoint = os.getcwd() + '/pretrained_model/' + os.listdir('pretrained_model')[0] + '/checkpoint/ckpt-0'
-        pipeline_fname = os.getcwd() + '/pretrained_model/' + os.listdir('pretrained_model')[0] + '/pipeline.config'
-    else:
+    if args.fine_tune_path:
         fine_tune_checkpoint = args.fine_tune_path
-        pipeline_fname = args.pipeline_file
+    else:
+        fine_tune_checkpoint = os.getcwd() + '/pretrained_model/' + os.listdir('pretrained_model')[0] + '/checkpoint/ckpt-0'        
+
+    if args.pipeline_path:
+        pipeline_fname = args.pipeline_path
+    else:
+        pipeline_fname = os.getcwd() + '/pretrained_model/' + os.listdir('pretrained_model')[0] + '/pipeline.config'
 
     train_record_fname = args.train_record_path
     test_record_fname = args.test_record_path
@@ -108,7 +110,8 @@ if __name__ == '__main__':
     parser.add_argument('--download_url', type=str)
     parser.add_argument('--train_record_path', type=str)
     parser.add_argument('--test_record_path', type=str)
-    parser.add_argument('--use_coco_checkpoint', type=bool, default=True)
+    parser.add_argument('--fine_tune_path', type=str)
+    parser.add_argument('--pipeline_path', type=str)
     args = parser.parse_args()
 
     main(args)
