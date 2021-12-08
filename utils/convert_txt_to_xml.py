@@ -1,7 +1,7 @@
 from xml.dom.minidom import Document
 import os
 import os.path
-from PIL import Image
+from PIL import Image, ImageOps
 
 ann_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Spruyt/labels/'      
 img_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Spruyt/images/'   
@@ -22,7 +22,13 @@ def writeXml(tmp, imgname, w, h, objbud, wxml):
     # owner
     folder = doc.createElement('folder')
     annotation.appendChild(folder)
-    folder_txt = doc.createTextNode("VOC2005")
+
+    try:
+        split_folder = wxml.split('/')
+        folder_txt = doc.createTextNode(split_folder[len(split_folder)-3])
+    except:
+        folder_txt = doc.createTextNode("Unkown")
+
     folder.appendChild(folder_txt)
 
     filename = doc.createElement('filename')
@@ -33,22 +39,11 @@ def writeXml(tmp, imgname, w, h, objbud, wxml):
     source = doc.createElement('source')
     annotation.appendChild(source)
 
-    database = doc.createElement('database')
-    source.appendChild(database)
-    database_txt = doc.createTextNode("The VOC2005 Database")
-    database.appendChild(database_txt)
-
     annotation_new = doc.createElement('annotation')
     source.appendChild(annotation_new)
     annotation_new_txt = doc.createTextNode("PASCAL VOC2005")
     annotation_new.appendChild(annotation_new_txt)
 
-    image = doc.createElement('image')
-    source.appendChild(image)
-    image_txt = doc.createTextNode("flickr")
-    image.appendChild(image_txt)
-    # onee#
-    # twos#
     size = doc.createElement('size')
     annotation.appendChild(size)
 
@@ -106,20 +101,10 @@ def writeXml(tmp, imgname, w, h, objbud, wxml):
         y1 = float(objbuds[2])
         w1 = float(objbuds[3])
         h1 = float(objbuds[4])
-        
-        #xmin_txt1 = float(objbuds[1])  #0.674883
-        #ymin_txt1 = float(objbuds[3])  #0.647917
-        #xmax_txt1 = float(objbuds[2])  #0.143192
-        #ymax_txt1 = float(objbuds[4])  #0.700000
-
-        # w = 852
-        # h =480
-
-        
+               
         xmin = doc.createElement('xmin')
         bndbox.appendChild(xmin)
                 
-     
         xmin_txt2 = int((x1*w) - (w1*w)/2.0)
         #print(xmin_txt2)
         xmin_txt = doc.createTextNode(str(xmin_txt2))
@@ -134,7 +119,10 @@ def writeXml(tmp, imgname, w, h, objbud, wxml):
 
         xmax = doc.createElement('xmax')
         bndbox.appendChild(xmax) 
+        
         xmax_txt2 = int((x1*w)+(w1*w)/2.0)
+        xmax_txt2 = xmax_txt2 if xmax_txt2 <= w else w
+        
         #print(xmax_txt2)
         xmax_txt = doc.createTextNode(str(xmax_txt2))
         xmax.appendChild(xmax_txt)
@@ -142,7 +130,10 @@ def writeXml(tmp, imgname, w, h, objbud, wxml):
 
         ymax = doc.createElement('ymax')
         bndbox.appendChild(ymax)
+
         ymax_txt2 = int((y1*h)+(h1*h)/2.0)
+        ymax_txt2 = ymax_txt2 if ymax_txt2 <= h else h
+
         #print(ymax_txt2)
         ymax_txt = doc.createTextNode(str(ymax_txt2))
         ymax.appendChild(ymax_txt)
@@ -186,7 +177,8 @@ for files in os.walk(ann_path):
         print (file + "-->start!")
         img_name = os.path.splitext(file)[0] + '.jpg'
         fileimgpath = img_path + img_name
-        im = Image.open(fileimgpath)
+        im = ImageOps.exif_transpose(Image.open(fileimgpath))
+
         width = int(im.size[0])
         height = int(im.size[1])
 
