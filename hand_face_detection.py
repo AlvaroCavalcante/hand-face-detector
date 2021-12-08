@@ -57,7 +57,11 @@ start_time = time.time()
 fps_hist = []
 
 while True:
-    _, frame = cap.read()
+    got_frame, frame = cap.read()
+
+    if not got_frame:
+        break
+
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     # output = frame.copy()
     frame = cv2.resize(frame, (512, 512)).astype('uint8')
