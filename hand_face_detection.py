@@ -49,11 +49,12 @@ def infer_images(image, label_map_path, draw_image=False):
 
 detect_fn = tf.saved_model.load('/home/alvaro/Downloads/exported_model_2/saved_model/')
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('/home/alvaro/Documentos/body-detection/utils/test_videos/asl_bench.mp4')
 
 count = 0
 fps = str(0)
 start_time = time.time()
+fps_hist = []
 
 while True:
     _, frame = cap.read()
@@ -69,8 +70,12 @@ while True:
         print("detection FPS: {}".format(str(fps)))
         count = 0
         start_time = time.time()
+        fps_hist.append(fps)
 
     cv2.imshow("Frame", cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB))
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q"):
         break
+
+print(fps_hist)
+print('Mean FPS: ', str(sum(fps_hist) / len(fps_hist)))
