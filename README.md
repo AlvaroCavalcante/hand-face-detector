@@ -15,6 +15,8 @@ After transforming the annotations into XML format, it's necessary to convert th
 ```
 python3 utils/xml_to_csv.py -i /xml-path -o /csv-output-path
 ```
+It's possible that some labels were incorrectly converted in this process. In order to check if the train and test labels are correct you can run the **verify_labels.py** script, changing the base path to indicate your current path.
+
 Finally, it's necessary to convert the CSV files into TFRecord format to train the object detector using the TF Data API. To do so, just run the following code:
 ```
 python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=./utils/label_map.pbtxt --n_splits n_files_to_generate 
@@ -35,7 +37,7 @@ After that, it's also necessary to convert the XML annotations and the images in
 ```
 python3 utils/dataset_split.py
 ```
-The default division proportion is 80/20, respectivelly. 
+The default division proportion is 80/20, respectivelly. To finish the dataset preparation, it's necessary to transform the XML annotations into CSV and then in TFRecords. This can be done following the same procedure showed before.
 
 ### **Training the model**
 To train the object detector, the first step in to execute the model setup, by running the following script:
