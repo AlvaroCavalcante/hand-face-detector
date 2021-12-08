@@ -3,9 +3,9 @@ import os
 import os.path
 from PIL import Image, ImageOps
 
-ann_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Spruyt/labels/'      
-img_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Spruyt/images/'   
-xml_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Spruyt/labels_xml/'
+ann_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Pascal_VOC/labels/'      
+img_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Pascal_VOC/images/'   
+xml_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Pascal_VOC/labels_xml/'
 
 if not os.path.exists(xml_path):
     os.mkdir(xml_path)
@@ -106,13 +106,18 @@ def writeXml(tmp, imgname, w, h, objbud, wxml):
         bndbox.appendChild(xmin)
                 
         xmin_txt2 = int((x1*w) - (w1*w)/2.0)
+        xmin_txt2 = xmin_txt2 if xmin_txt2 > 0 else 1
+
         #print(xmin_txt2)
         xmin_txt = doc.createTextNode(str(xmin_txt2))
         xmin.appendChild(xmin_txt)
 
         ymin = doc.createElement('ymin')
         bndbox.appendChild(ymin)
+        
         ymin_txt2 = int((y1*h)-(h1*h)/2.0)
+        ymin_txt2 = ymin_txt2 if ymin_txt2 > 0 else 1
+
         #print(ymin_txt2)
         ymin_txt = doc.createTextNode(str(ymin_txt2))
         ymin.appendChild(ymin_txt)
