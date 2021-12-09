@@ -6,12 +6,27 @@ import time
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as viz_utils
 import argparse
+from itertools import combinations
 
 physical_devices = tf.config.list_physical_devices('GPU')
 try:
     tf.config.experimental.set_memory_growth(physical_devices[0], True)
 except:
     print('GPU not found')
+
+def draw_lines_and_centroids(bouding_boxes, img):
+    centroids = []
+    for bbox in bouding_boxes:
+        xmin, xmax, ymin, ymax = bbox['xmin'], bbox['xmax'], bbox['ymin'], bbox['ymax']
+        centroid = (int((xmin+xmax)/2), int((ymin+ymax)/2))
+        centroids.append(centroid)
+
+    for cc in combinations(centroids, 2):
+        centroid_1 = cc[0]
+        centroid_2 = cc[1]
+        cv2.line(img, (centroid_1[0], centroid_1[1]), (centroid_2[0], centroid_2[1]), (0, 255, 0), thickness=5)
+
+    return img
 
 def infer_images(image, label_map_path, detect_fn):
     image_np = np.array(image)
@@ -32,7 +47,7 @@ def infer_images(image, label_map_path, detect_fn):
     
     image_np_with_detections = image_np.copy()
 
-    viz_utils.visualize_boxes_and_labels_on_image_array(
+    bouding_boxes = viz_utils.visualize_boxes_and_labels_on_image_array(
         image_np_with_detections,
         detections['detection_boxes'],
         detections['detection_classes'],
@@ -40,10 +55,11 @@ def infer_images(image, label_map_path, detect_fn):
         category_index,
         use_normalized_coordinates=True,
         max_boxes_to_draw=200,
-        min_score_thresh=.30,
+        min_score_thresh=.35,
         agnostic_mode=False)
 
-    return detections['detection_boxes'], detections['detection_classes'], detections['detection_scores'], image_np_with_detections
+    image_np_with_detections = draw_lines_and_centroids(bouding_boxes, image_np_with_detections)
+    return image_np_with_detections
 
 
 def main(args):
@@ -65,7 +81,7 @@ def main(args):
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, (512, 512)).astype('uint8')
-        _, _, _, img_np = infer_images(frame, args.label_map_path, detect_fn)
+        img_np = infer_images(frame, args.label_map_path, detect_fn)
         frame = np.divide(frame, 255)
 
         count += 1
@@ -86,7 +102,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--saved_model_path', type=str)
+    parser.add_argument('--saved_model_path', type=str, default='/home/alvaro/Downloads/exported_model_2/saved_model')
     parser.add_argument('--source_path', type=str)
     parser.add_argument('--label_map_path', type=str, default='./utils/label_map.pbtxt')
     args = parser.parse_args()
