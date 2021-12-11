@@ -104,20 +104,22 @@ def main(args):
             start_time = time.time()
             fps_hist.append(fps)
 
-        cv2.imshow('Frame', cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
-            break
+        if not args.use_docker:
+            cv2.imshow('Frame', cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
+                break
 
     print(fps_hist)
     print('Mean FPS: ', str(sum(fps_hist) / len(fps_hist)))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--saved_model_path', type=str, default='/home/alvaro/Downloads/ssd_v2/saved_model')
+    parser.add_argument('--saved_model_path', type=str, default='./utils/ssd_v2/saved_model')
     parser.add_argument('--source_path', type=str)
     parser.add_argument('--label_map_path', type=str, default='./utils/label_map.pbtxt')
-    parser.add_argument('--compute_features', type=str, default=True)
+    parser.add_argument('--compute_features', type=bool, default=True)
+    parser.add_argument('--use_docker', type=bool, default=False)
     args = parser.parse_args()
 
     main(args)
