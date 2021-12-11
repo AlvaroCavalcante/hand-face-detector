@@ -1,10 +1,8 @@
-from os import name
 import tensorflow as tf
 import numpy as np
 import cv2
 import time
-from object_detection.utils import label_map_util
-from object_detection.utils import visualization_utils as viz_utils
+from utils import label_map_util
 import argparse
 from itertools import combinations
 
@@ -28,15 +26,31 @@ def draw_lines_and_centroids(bouding_boxes, img):
 
     return img
 
-def infer_images(image, label_map_path, detect_fn):
+def draw_boxes_on_img(image_np_with_detections, label_map_path, scores, classes, boxes, heigth, width):
+    category_index = label_map_util.create_category_index_from_labelmap(label_map_path,
+                                                            use_display_name=True)
+
+    output_bboxes = []
+    for i in range(len(scores)):
+        class_name = category_index[classes[i]].get('name')
+        if scores[i] <= 0.4:
+            continue
+
+        xmin, xmax, ymin, ymax = boxes[i][1], boxes[i][3], boxes[i][0], boxes[i][2]
+        xmin, xmax, ymin, ymax = int(xmin * width), int(xmax * width), int(ymin * heigth), int(ymax * heigth)
+        output_bboxes.append({'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax})
+        
+        color = (0,255,0) if class_name == 'face' else (255,0,0)
+        cv2.rectangle(image_np_with_detections, (xmin, ymin), (xmax, ymax), color, 2)
+
+    return image_np_with_detections, output_bboxes
+
+def infer_images(image, output_img, label_map_path, detect_fn, heigth, width):
     image_np = np.array(image)
     input_tensor = tf.convert_to_tensor(image_np)
     input_tensor = input_tensor[tf.newaxis, ...]
 
     detections = detect_fn(input_tensor)
-
-    category_index = label_map_util.create_category_index_from_labelmap(label_map_path,
-                                                            use_display_name=True)
 
     num_detections = int(detections.pop('num_detections'))
     detections = {key: value[0, :num_detections].numpy()
@@ -44,18 +58,14 @@ def infer_images(image, label_map_path, detect_fn):
     detections['num_detections'] = num_detections
 
     detections['detection_classes'] = detections['detection_classes'].astype(np.int64)
-    image_np_with_detections = image_np.copy()
 
-    bouding_boxes = viz_utils.visualize_boxes_and_labels_on_image_array(
-        image_np_with_detections,
+    image_np_with_detections, bouding_boxes = draw_boxes_on_img(
+        output_img, 
+        label_map_path, 
+        detections['detection_scores'], 
+        detections['detection_classes'], 
         detections['detection_boxes'],
-        detections['detection_classes'],
-        detections['detection_scores'],
-        category_index,
-        use_normalized_coordinates=True,
-        max_boxes_to_draw=200,
-        min_score_thresh=.4,
-        agnostic_mode=False)
+        heigth, width)
 
     return image_np_with_detections, bouding_boxes
 
@@ -77,20 +87,14 @@ def main(args):
             break
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        output = frame.copy()
-        h, w = output.shape[0], output.shape[1]
+        output_img = frame.copy()
+        heigth, width = output_img.shape[0], output_img.shape[1]
 
         frame = cv2.resize(frame, (320, 320)).astype('uint8')
-        _, bouding_boxes = infer_images(frame, args.label_map_path, detect_fn)
-
-        output_bboxes = []
-        for bbox in bouding_boxes:
-            xmin, xmax, ymin, ymax = int(bbox['xmin'] * w), int(bbox['xmax'] * w), int(bbox['ymin'] * h), int(bbox['ymax'] * h)
-            cv2.rectangle(output, (xmin, ymin), (xmax, ymax), (0,255,0), 2)
-            output_bboxes.append({'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax})
+        output_img, bouding_boxes = infer_images(frame, output_img, args.label_map_path, detect_fn, heigth, width)
 
         if args.compute_features:
-            output = draw_lines_and_centroids(output_bboxes, output)
+            output_img = draw_lines_and_centroids(bouding_boxes, output_img)
 
         count += 1
         if (time.time() - start_time) > 1:
@@ -100,7 +104,7 @@ def main(args):
             start_time = time.time()
             fps_hist.append(fps)
 
-        cv2.imshow('Frame', cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+        cv2.imshow('Frame', cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
