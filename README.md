@@ -68,5 +68,6 @@ To verify the model working, we need to run the **hand_face_detection.py** scrip
 - **source_path**: Path of the video file to test the model. The default behavior is to use the webcam stream.
 - **label_map_path**: Path of the label map used by the model.
 - **compute_features**: If True, the trigronometrical features are calculated. 
+- **use_docker**: Removes result visualization when running inside docker container.
 
 The **asl_bench.mp4** video, inside utils/test_videos folder is used as a commom benchmarking for the trained models, where the goal is to verify the mean FPS.

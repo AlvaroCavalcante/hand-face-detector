@@ -1,9 +1,1 @@
-numpy
-Pillow
-imutils
-notebook 
-jupyter 
-tensorflow
-moviepy 
-autovizwidget
-opencv-python
+opencv-python==4.5.1.48
