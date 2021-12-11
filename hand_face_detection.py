@@ -44,7 +44,6 @@ def infer_images(image, label_map_path, detect_fn):
     detections['num_detections'] = num_detections
 
     detections['detection_classes'] = detections['detection_classes'].astype(np.int64)
-    
     image_np_with_detections = image_np.copy()
 
     bouding_boxes = viz_utils.visualize_boxes_and_labels_on_image_array(
@@ -55,12 +54,10 @@ def infer_images(image, label_map_path, detect_fn):
         category_index,
         use_normalized_coordinates=True,
         max_boxes_to_draw=200,
-        min_score_thresh=.35,
+        min_score_thresh=.4,
         agnostic_mode=False)
 
-    image_np_with_detections = draw_lines_and_centroids(bouding_boxes, image_np_with_detections)
-    return image_np_with_detections
-
+    return image_np_with_detections, bouding_boxes
 
 def main(args):
     detect_fn = tf.saved_model.load(args.saved_model_path)
@@ -80,9 +77,20 @@ def main(args):
             break
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.resize(frame, (512, 512)).astype('uint8')
-        img_np = infer_images(frame, args.label_map_path, detect_fn)
-        frame = np.divide(frame, 255)
+        output = frame.copy()
+        h, w = output.shape[0], output.shape[1]
+
+        frame = cv2.resize(frame, (320, 320)).astype('uint8')
+        _, bouding_boxes = infer_images(frame, args.label_map_path, detect_fn)
+
+        output_bboxes = []
+        for bbox in bouding_boxes:
+            xmin, xmax, ymin, ymax = int(bbox['xmin'] * w), int(bbox['xmax'] * w), int(bbox['ymin'] * h), int(bbox['ymax'] * h)
+            cv2.rectangle(output, (xmin, ymin), (xmax, ymax), (0,255,0), 2)
+            output_bboxes.append({'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax})
+
+        if args.compute_features:
+            output = draw_lines_and_centroids(output_bboxes, output)
 
         count += 1
         if (time.time() - start_time) > 1:
@@ -92,7 +100,7 @@ def main(args):
             start_time = time.time()
             fps_hist.append(fps)
 
-        cv2.imshow('Frame', cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB))
+        cv2.imshow('Frame', cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
@@ -102,9 +110,10 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--saved_model_path', type=str, default='/home/alvaro/Downloads/exported_model_2/saved_model')
+    parser.add_argument('--saved_model_path', type=str, default='/home/alvaro/Downloads/ssd_v2/saved_model')
     parser.add_argument('--source_path', type=str)
     parser.add_argument('--label_map_path', type=str, default='./utils/label_map.pbtxt')
+    parser.add_argument('--compute_features', type=str, default=True)
     args = parser.parse_args()
 
     main(args)
