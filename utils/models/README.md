@@ -1,0 +1,1 @@
+This folder could contain TF Models to test the execution of the script. 
