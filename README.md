@@ -25,7 +25,7 @@ python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./outp
 ## Hand and Face Dataset
 Once the goal of the most recent work is to detect hand and face simultaneously, another dataset was required, since it's necessary to have hands and faces annotated at the same time. For this pourpose, we used the "Autonomy" dataset, which contains a collection of other open source datasets but with both hand and face annotated. The original paper can be found [here](https://autonomy.cs.sfu.ca/doc/mohaimenian_iros2018.pdf).
 
-The annotations are found in TXT format, and could be converted to XML by using the **convert_txt_to_xml.py** script. To run the code, first it's necessary to change the dataset path in the beginning of the script and the label map with the class annotations. After that, just run the following command.
+The annotations are present in TXT format (used by default in Yolo), and could be converted to XML by using the **convert_txt_to_xml.py** script. To run the code, first it's necessary to change the dataset path in the beginning of the script and the label map with the class annotations. After that, just run the following command.
 ```
 python3 utils/convert_txt_to_xml.py
 ```
@@ -40,13 +40,13 @@ python3 utils/dataset_split.py
 The default division proportion is 80/20, respectivelly. To finish the dataset preparation, it's necessary to transform the XML annotations into CSV and then in TFRecords. This can be done following the same procedure showed before.
 
 ### **Training the model**
-To train the object detector, the first step in to execute the model setup, by running the following script:
+To train the object detector, the first step is to execute the model setup, by running the following script:
 
 ```
 python3 hand_face_detector_setup.py --label_map_path /label_map.pbtxt --batch_size 50 --model_name "Your model name" --download_url http://tf-url.com
 ```
 
-Where the model name and download url is taken from [TF Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md). 
+Where the model name and download url is taken from [TF Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md). The setup script basically configures the pipeline file to prepare the model to be trained.
 
 After the model setup, you just need to run the following code to start the detector training:
 ```
@@ -58,3 +58,15 @@ python /models/research/object_detection/model_main_tf2.py \
     --checkpoint_every_n=1000 \
     --num_eval_steps={num_eval_steps}
 ```
+
+The model training was conducted on Google Colab. The notebook can be found [here](https://colab.research.google.com/drive/1209hYjuj449H-H_jfXLMdvnSgHYWgsq0?usp=sharing).
+
+## Testing model results
+To verify the model working, we need to run the **hand_face_detection.py** script, with the following arguments:
+
+- **saved_model_path**: Path of the saved_model
+- **source_path**: Path of the video file to test the model. The default behavior is to use the webcam stream.
+- **label_map_path**: Path of the label map used by the model.
+- **compute_features**: If True, the trigronometrical features are calculated. 
+
+The **asl_bench.mp4** video, inside utils/test_videos folder is used as a commom benchmarking for the trained models, where the goal is to verify the mean FPS.
