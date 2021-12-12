@@ -35,15 +35,23 @@ def compute_features_and_draw_lines(bouding_boxes, img):
 
     return img
 
-def draw_boxes_on_img(image_np_with_detections, label_map_path, scores, classes, boxes, heigth, width):
+def draw_boxes_on_img(image_np_with_detections, label_map_path, scores, classes, boxes, heigth, width, single_person):
     category_index = label_map_util.create_category_index_from_labelmap(label_map_path,
                                                             use_display_name=True)
 
     output_bboxes = []
-    for i in range(len(scores)):
+    hand_counter = 2
+    face_counter = 1
+    for i in np.where(scores > .4)[0]:
         class_name = category_index[classes[i]].get('name')
-        if scores[i] <= 0.4:
-            continue
+
+        if single_person:
+            if face_counter == 0 and hand_counter == 0:
+                return image_np_with_detections, output_bboxes      
+            if class_name == 'face' and face_counter == 0:
+                continue
+            elif class_name == 'hand' and hand_counter == 0:
+                continue
 
         xmin, xmax, ymin, ymax = boxes[i][1], boxes[i][3], boxes[i][0], boxes[i][2]
         xmin, xmax, ymin, ymax = int(xmin * width), int(xmax * width), int(ymin * heigth), int(ymax * heigth)
@@ -52,9 +60,14 @@ def draw_boxes_on_img(image_np_with_detections, label_map_path, scores, classes,
         color = (0,255,0) if class_name == 'face' else (255,0,0)
         cv2.rectangle(image_np_with_detections, (xmin, ymin), (xmax, ymax), color, 2)
 
+        if class_name == 'face':
+            face_counter -= 1
+        else:
+            hand_counter -= 1
+
     return image_np_with_detections, output_bboxes
 
-def infer_images(image, output_img, label_map_path, detect_fn, heigth, width):
+def infer_images(image, output_img, label_map_path, detect_fn, heigth, width, single_person):
     image_np = np.array(image)
     input_tensor = tf.convert_to_tensor(image_np)
     input_tensor = input_tensor[tf.newaxis, ...]
@@ -74,7 +87,7 @@ def infer_images(image, output_img, label_map_path, detect_fn, heigth, width):
         detections['detection_scores'], 
         detections['detection_classes'], 
         detections['detection_boxes'],
-        heigth, width)
+        heigth, width, single_person)
 
     return image_np_with_detections, bouding_boxes
 
@@ -100,7 +113,7 @@ def main(args):
         heigth, width = output_img.shape[0], output_img.shape[1]
 
         frame = cv2.resize(frame, (320, 320)).astype('uint8')
-        output_img, bouding_boxes = infer_images(frame, output_img, args.label_map_path, detect_fn, heigth, width)
+        output_img, bouding_boxes = infer_images(frame, output_img, args.label_map_path, detect_fn, heigth, width, args.single_person)
 
         if args.compute_features:
             output_img = compute_features_and_draw_lines(bouding_boxes, output_img)
@@ -124,11 +137,12 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--saved_model_path', type=str, default='./utils/ssd_v2/saved_model')
+    parser.add_argument('--saved_model_path', type=str, default='./utils/models/ssd_v2/saved_model')
     parser.add_argument('--source_path', type=str)
     parser.add_argument('--label_map_path', type=str, default='./utils/label_map.pbtxt')
     parser.add_argument('--compute_features', type=bool, default=True)
     parser.add_argument('--use_docker', type=bool, default=False)
+    parser.add_argument('--single_person', type=bool, default=True)
     args = parser.parse_args()
 
     main(args)
