@@ -22,6 +22,34 @@ def get_centroids(bouding_boxes):
     
     return centroids
 
+def get_angle(opposite, adjacent_1, adjacent_2):
+    cos_value = ((adjacent_1**2 + adjacent_2**2) - opposite**2) / (2*(adjacent_1*adjacent_2))
+    rad = math.acos(cos_value)
+
+    degrees = rad * 180 / math.pi 
+
+    return degrees
+
+def compute_triangle_features(euclidian_distances):
+    d1, d2, d3 = euclidian_distances[0], euclidian_distances[1], euclidian_distances[2]
+    triangle_features = {}
+
+    triangle_features['perimeter'] = d1 + d2 + d3
+    triangle_features['semi_perimeter'] = triangle_features['perimeter'] / 2
+    triangle_features['area'] = math.sqrt(
+        (triangle_features['semi_perimeter'] * (triangle_features['semi_perimeter'] - d1) * (
+        triangle_features['semi_perimeter'] - d2) * (triangle_features['semi_perimeter'] - d3)))
+
+    triangle_features['ang_inter_a'] = get_angle(d3, d1, d2) 
+    triangle_features['ang_inter_b'] = get_angle(d1, d2, d3)
+    triangle_features['ang_inter_c'] = 180.0 - (triangle_features['ang_inter_a'] + triangle_features['ang_inter_b'])
+
+    triangle_features['ang_ext_a'] = triangle_features['ang_inter_b'] + triangle_features['ang_inter_c']
+    triangle_features['ang_ext_b'] = triangle_features['ang_inter_a'] + triangle_features['ang_inter_c']
+    triangle_features['ang_ext_c'] = triangle_features['ang_inter_b'] + triangle_features['ang_inter_a']
+
+    return triangle_features
+
 def compute_features_and_draw_lines(bouding_boxes, img):
     centroids = get_centroids(bouding_boxes)
     euclidian_distances = []
@@ -33,7 +61,11 @@ def compute_features_and_draw_lines(bouding_boxes, img):
         distance = math.sqrt((centroid_1[0]-centroid_2[0])**2+(centroid_1[1]-centroid_2[1])**2)
         euclidian_distances.append(distance)
 
-    return img
+    triangle_features = {}
+    if len(centroids) == 3:
+        triangle_features = compute_triangle_features(euclidian_distances)
+
+    return img, euclidian_distances, triangle_features
 
 def draw_boxes_on_img(image_np_with_detections, label_map_path, scores, classes, boxes, heigth, width, single_person):
     category_index = label_map_util.create_category_index_from_labelmap(label_map_path,
@@ -116,7 +148,7 @@ def main(args):
         output_img, bouding_boxes = infer_images(frame, output_img, args.label_map_path, detect_fn, heigth, width, args.single_person)
 
         if args.compute_features:
-            output_img = compute_features_and_draw_lines(bouding_boxes, output_img)
+            output_img, distances, triangle_features = compute_features_and_draw_lines(bouding_boxes, output_img)
 
         count += 1
         if (time.time() - start_time) > 1:
