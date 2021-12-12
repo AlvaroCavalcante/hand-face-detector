@@ -5,6 +5,7 @@ import time
 from utils import label_map_util
 import argparse
 from itertools import combinations
+import math
 
 physical_devices = tf.config.list_physical_devices('GPU')
 try:
@@ -12,17 +13,25 @@ try:
 except:
     print('GPU not found')
 
-def draw_lines_and_centroids(bouding_boxes, img):
+def get_centroids(bouding_boxes):
     centroids = []
     for bbox in bouding_boxes:
         xmin, xmax, ymin, ymax = bbox['xmin'], bbox['xmax'], bbox['ymin'], bbox['ymax']
         centroid = (int((xmin+xmax)/2), int((ymin+ymax)/2))
         centroids.append(centroid)
+    
+    return centroids
+
+def compute_features_and_draw_lines(bouding_boxes, img):
+    centroids = get_centroids(bouding_boxes)
+    euclidian_distances = []
 
     for cc in combinations(centroids, 2):
         centroid_1 = cc[0]
         centroid_2 = cc[1]
         cv2.line(img, (centroid_1[0], centroid_1[1]), (centroid_2[0], centroid_2[1]), (0, 255, 0), thickness=5)
+        distance = math.sqrt((centroid_1[0]-centroid_2[0])**2+(centroid_1[1]-centroid_2[1])**2)
+        euclidian_distances.append(distance)
 
     return img
 
@@ -94,7 +103,7 @@ def main(args):
         output_img, bouding_boxes = infer_images(frame, output_img, args.label_map_path, detect_fn, heigth, width)
 
         if args.compute_features:
-            output_img = draw_lines_and_centroids(bouding_boxes, output_img)
+            output_img = compute_features_and_draw_lines(bouding_boxes, output_img)
 
         count += 1
         if (time.time() - start_time) > 1:
