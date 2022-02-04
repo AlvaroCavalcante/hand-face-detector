@@ -23,6 +23,7 @@ def get_centroids(bouding_boxes):
     return centroids
 
 def get_angle(opposite, adjacent_1, adjacent_2):
+    # lei dos cossenos: https://pt.khanacademy.org/math/trigonometry/trig-with-general-triangles/law-of-cosines/v/law-of-cosines-missing-angle
     cos_value = ((adjacent_1**2 + adjacent_2**2) - opposite**2) / (2*(adjacent_1*adjacent_2))
     rad = math.acos(cos_value)
 
@@ -36,7 +37,7 @@ def compute_triangle_features(euclidian_distances):
 
     triangle_features['perimeter'] = d1 + d2 + d3
     triangle_features['semi_perimeter'] = triangle_features['perimeter'] / 2
-    triangle_features['area'] = math.sqrt(
+    triangle_features['area'] = math.sqrt(   # Fórmula de Heron https://www.todamateria.com.br/area-do-triangulo/
         (triangle_features['semi_perimeter'] * (triangle_features['semi_perimeter'] - d1) * (
         triangle_features['semi_perimeter'] - d2) * (triangle_features['semi_perimeter'] - d3)))
 
@@ -44,6 +45,7 @@ def compute_triangle_features(euclidian_distances):
     triangle_features['ang_inter_b'] = get_angle(d1, d2, d3)
     triangle_features['ang_inter_c'] = 180.0 - (triangle_features['ang_inter_a'] + triangle_features['ang_inter_b'])
 
+    # teorema dos Ângulos externos https://pt.wikipedia.org/wiki/Teorema_dos_%C3%A2ngulos_externos
     triangle_features['ang_ext_a'] = triangle_features['ang_inter_b'] + triangle_features['ang_inter_c']
     triangle_features['ang_ext_b'] = triangle_features['ang_inter_a'] + triangle_features['ang_inter_c']
     triangle_features['ang_ext_c'] = triangle_features['ang_inter_b'] + triangle_features['ang_inter_a']
