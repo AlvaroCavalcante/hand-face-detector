@@ -1,7 +1,7 @@
 import os 
 import shutil
 
-base_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Autonomy/labels/'
+base_path = 'autonomy_hands_and_faces/Autonomy/labels/'
 folders = os.listdir(base_path)
 
 for folder in folders:

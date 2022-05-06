@@ -3,9 +3,9 @@ import os
 import os.path
 from PIL import Image, ImageOps
 
-ann_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Pascal_VOC/labels/'      
-img_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Pascal_VOC/images/'   
-xml_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/Pascal_VOC/labels_xml/'
+ann_path = 'autonomy_hands_and_faces/Pascal_VOC/labels/'      
+img_path = 'autonomy_hands_and_faces/Pascal_VOC/images/'   
+xml_path = 'autonomy_hands_and_faces/Pascal_VOC/labels_xml/'
 
 if not os.path.exists(xml_path):
     os.mkdir(xml_path)
@@ -13,7 +13,7 @@ if not os.path.exists(xml_path):
 
 def writeXml(tmp, imgname, w, h, objbud, wxml):
     doc = Document()
-    #Define class number according to the  classes in the .txt file
+    # Define class number according to the  classes in the .txt file
     dict = {'0': "hand",
             '1': "face"}
     # owner

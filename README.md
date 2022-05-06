@@ -1,45 +1,51 @@
-# Multi-Cue detector for sign language
+# Hand and Face Detector for Sign Language
 
-This repo contains the code used to train an object detection algorithm to detect human faces and hands as a preprocessing step to a sign language recognition system
+Detecting the hands and the face is an important task for sign language, once those channels have most part of the information used to discriminate the sign.
 
-## Hand Dataset
-The initial dataset used to train the hand detector was the [hand dataset](https://www.robots.ox.ac.uk/~vgg/data/hands/).
+Based on this, this repository contains all the documentation that supports the project of a large-scale object detector for hands and faces. Besides the source code, you will find the pretrained models, datasets, and other useful resources for this context.
 
-The dataset labels are in the .mat format and need to be converted into XML in order to train the detector using TensorFlow. To do so we used the ```mat_to_xml.py``` algorithm. To run the code, just use:
+Although this object detection model and dataset could be used for other problems, the main application was done for sign language. That's why most part of the dataset used to train this model was based on people executing signs. 
 
-```
-python3 utils/mat_to_xml.py --img-path /imgs-folder-path --annotations-path /mat-annotations-folder --output-path /folder-to-store-xml
-```
-
-After transforming the annotations into XML format, it's necessary to convert then into CSV. This can be easily done by the following command:
-```
-python3 utils/xml_to_csv.py -i /xml-path -o /csv-output-path
-```
-It's possible that some labels were incorrectly converted in this process. In order to check if the train and test labels are correct you can run the **verify_labels.py** script, changing the base path to indicate your current path.
-
-Finally, it's necessary to convert the CSV files into TFRecord format to train the object detector using the TF Data API. To do so, just run the following code:
-```
-python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=./utils/label_map.pbtxt --n_splits n_files_to_generate 
-```
 
 ## Hand and Face Dataset
-Once the goal of the most recent work is to detect hand and face simultaneously, another dataset was required, since it's necessary to have hands and faces annotated at the same time. For this pourpose, we used the "Autonomy" dataset, which contains a collection of other open source datasets but with both hand and face annotated. The original paper can be found [here](https://autonomy.cs.sfu.ca/doc/mohaimenian_iros2018.pdf).
+The initial dataset used in this research was actually a collection of 8 different open-source datasets, containing more than 50,000 annotated frames, as described in the [author's paper](https://autonomy.cs.sfu.ca/doc/mohaimenian_iros2018.pdf). The reference and description of each dataset can be found below:
 
-The annotations are present in TXT format (used by default in Yolo), and could be converted to XML by using the **convert_txt_to_xml.py** script. To run the code, first it's necessary to change the dataset path in the beginning of the script and the label map with the class annotations. After that, just run the following command.
+|  Dataset | Frames  | Hands  | Faces  |
+|---|---|---|---|
+| [Autonomy Hands and Faces](https://autonomy.cs.sfu.ca/doc/mohaimenian_iros2018.pdf)   | 16,883  |  34,588 | 18,838 |
+|  [Mittal](https://www.robots.ox.ac.uk/~vgg/publications/2011/Mittal11/mittal11.pdf) |  5,628  | 13,050  | 11,045  |
+|  [Sensors](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4168488/) | 1,251  |  2,502 | 1,251  |
+|  [Pascal VOC](https://homepages.inf.ed.ac.uk/ckiw/postscript/ijcv_voc09.pdf) | 582  | 1,532  | 1,055  |
+|  [Helen](https://openaccess.thecvf.com/content_iccv_2013/papers/Zhou_Exemplar-Based_Graph_Matching_2013_ICCV_paper.pdf) | 2,330  | 700  |  2,909 |
+|  [VIVA](https://ieeexplore.ieee.org/abstract/document/7313566) |  5,500 | 13,229  | 296  |
+|  [EgoHands](https://ieeexplore.ieee.org/document/7410583) | 4,800  | 15,053  | 1,033  |
+|  [Faces in the Wild](https://proceedings.neurips.cc/paper/2004/file/03fa2f7502f5f6b9169e67d17cbf51bb-Paper.pdf) | 13,391  |  14,200 |  21,783 |
+|  **Total** | **50,365**  |  **94,854** |  **58,210** |
+
+## Dataset Preparation
+The annotations are present in TXT format (used by default in the Yolo library), and could be converted to XML (For PASCAL VOC compatibility) by using the **convert_txt_to_xml.py** script. To run the code, first it's necessary to change the dataset path in the beginning of the script and the label map with the classes annotations. After that, just run the following command:
 ```
 python3 utils/convert_txt_to_xml.py
 ```
-This code was got from [this](https://github.com/MuhammadAsadJaved/Important-shells) open-source repo.
 
-**Note:** the "Autonomy" folder of this dataset is structured in multiple folders. To convert the annotations, first I used the script entitled "move_files.py" to centralize all the images and annotations.
+> This code was got from [this](https://github.com/MuhammadAsadJaved/Important-shells) open-source repo.
 
-After that, it's also necessary to convert the XML annotations and the images into TFRecords. To do so, first we need to centralize all the data in the train and test folders. It can be done by running the following code:
+**Note:** the dataset collection is originally structured in multiple folders. To easily convert the annotations, I first used the script entitled **move_files.py** to centralize all the images and annotations, this could also be useful for you!
+
+After that, it's also necessary to convert the XML annotations and the images into TFRecords. To do so, first, we need to split the data in the train and test folders. It can be done by running the following code:
 ```
 python3 utils/dataset_split.py
 ```
-The default division proportion is 80/20, respectivelly. To finish the dataset preparation, it's necessary to transform the XML annotations into CSV and then in TFRecords. This can be done following the same procedure showed before.
+The default division proportion is 80/20, respectively. To finish the dataset preparation, it's necessary to transform the XML annotations into CSV and then in TFRecords. To convert the annotations to CSV, run the following command:
+```
+python3 utils/xml_to_csv.py -i /xml-input-path -o /csv-output-path
+```
+Finally, it's necessary to convert the CSV files into TFRecord format to train the object detector using the TF Data API. To do so, just run the following code:
+```
+python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=/path-to-label_map.pbtxt --n_splits n_files_to_generate 
+```
 
-### **Training the model**
+## **Training the model**
 To train the object detector, the first step is to execute the model setup, by running the following script:
 
 ```

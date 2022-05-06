@@ -2,10 +2,10 @@ import os
 import random 
 import shutil
 
-base_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/'
+base_path = 'autonomy_hands_and_faces/'
 
 def move_sequence(files, base_path, train=True, labels=False):
-    dest_path = '/home/alvaro/Downloads/autonomy_hands_and_faces/full_data/'
+    dest_path = 'autonomy_hands_and_faces/full_data/'
     dest_path = dest_path + 'train/' if train else dest_path+'test/'
 
     for f in files:
