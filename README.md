@@ -7,7 +7,7 @@ Based on this, this repository contains all the documentation that supports the 
 Although this object detection model and dataset could be used for other problems, the main application was done for sign language. That's why most part of the dataset used to train this model was based on people executing signs. 
 
 
-## Hand and Face Dataset
+## General Hand and Face Dataset
 The initial dataset used in this research was actually a collection of 8 different open-source datasets, containing more than 50,000 annotated frames, as described in the [author's paper](https://autonomy.cs.sfu.ca/doc/mohaimenian_iros2018.pdf). The reference and description of each dataset can be found below:
 
 |  Dataset | Frames  | Hands  | Faces  |
@@ -45,7 +45,18 @@ Finally, it's necessary to convert the CSV files into TFRecord format to train t
 python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=/path-to-label_map.pbtxt --n_splits n_files_to_generate 
 ```
 
-## **Training the model**
+## Sign Language Hand and Face Dataset
+Our large-scale hand and face dataset for sign language was based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 different people performing signs, 20 backgrounds, and more than 36,000 videos.
+
+To create the dataset annotations, we first trained a hand and face detector model using the dataset described above. After that, we used an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the bounding boxes in XML format. Finally, we manually revised all the images and the respective boxes to fix the mistakes made by the model. The generated dataset has the following statistics:
+
+| Frames  | Hands  | Faces  |
+|---|---|---|
+| 477,480  |  954,960 | 477,480
+
+**NOTE:** We tried to detect 16 frames by video, but in some cases the model was not able to detect the objects.
+
+## **Training the Model**
 To train the object detector, the first step is to execute the model setup, by running the following script:
 
 ```
@@ -67,7 +78,7 @@ python /models/research/object_detection/model_main_tf2.py \
 
 The model training was conducted on Google Colab. The notebook can be found [here](https://colab.research.google.com/drive/1209hYjuj449H-H_jfXLMdvnSgHYWgsq0?usp=sharing).
 
-## Testing model results
+## Testing Model Results
 To verify the model working, we need to run the **hand_face_detection.py** script, with the following arguments:
 
 - **saved_model_path**: Path of the saved_model
@@ -79,7 +90,7 @@ To verify the model working, we need to run the **hand_face_detection.py** scrip
 
 The **asl_bench.mp4** video, inside utils/test_videos folder is used as a commom benchmarking for the trained models, where the goal is to verify the mean FPS.
 
-## Running project on Nvidia Docker
+## Running Project on Nvidia Docker
 An easy way to use your GPU is through the Nvidia Docker images. To do so, you can follow [this](https://www.tensorflow.org/install/docker?hl=pt-br) simple documentation. The first step is to install the nvidia support to docker, which can be done following [this](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) tutorial.
 
 You'll need to setup the repo into the GPG key:
