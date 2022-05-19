@@ -54,7 +54,14 @@ To create the dataset annotations, we first trained a hand and face detector mod
 |---|---|---|
 | 477,480  |  954,960 | 477,480
 
-**NOTE:** We tried to detect 16 frames by video, but in some cases the model was not able to detect the objects.
+**NOTE:** We tried to detect 16 frames by video, but in some cases the model was not able to detect the desired objects.
+
+### Dataset split
+The dataset was splitted into train, test and validation, in a proportion of 80/10/10, respectively. To split the data, the first step is to create a folder named **train**, **test** and **validation**, and then move the images and annotations into these folders. To simplify the process, we used the **dataset_split_autsl.py** script, running the following command:
+```
+python3 dataset_split_autsl.py
+``` 
+**NOTE:** It's necessary to change the images path. 
 
 ## **Training the Model**
 To train the object detector, the first step is to execute the model setup, by running the following script:
