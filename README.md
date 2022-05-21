@@ -56,6 +56,8 @@ To create the dataset annotations, we first trained a hand and face detector mod
 
 **NOTE:** We tried to detect 16 frames by video, but in some cases the model was not able to detect the desired objects.
 
+![Image](/assets/hand_face_example.png "Annotated dataset")
+
 ### Dataset split
 The dataset was splitted into train, test and validation, in a proportion of 80/10/10, respectively. To split the data, the first step is to create a folder named **train**, **test** and **validation**, and then move the images and annotations into these folders. To simplify the process, we used the **dataset_split_autsl.py** script, running the following command:
 ```
