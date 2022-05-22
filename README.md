@@ -65,6 +65,17 @@ python3 dataset_split_autsl.py
 ``` 
 **NOTE:** It's necessary to change the images path. 
 
+### TFRecord creation
+Finally, it's necessary to convert the images and XML files into the TFRecord format to ensure TensorFlow compatibility. This can be done by following the same procedure showed before, creating a csv file and then the binary files with the commands bellow:
+
+```
+python3 utils/xml_to_csv.py -i /xml-input-path -o /csv-output-path
+```
+```
+python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=/path-to-label_map.pbtxt --n_splits n_files_to_generate 
+```
+In this case, we created 15 TFRecord files for test and validation sets, and 110 files for training. Every file has around 200 MB.
+
 ## **Training the Model**
 To train the object detector, the first step is to execute the model setup, by running the following script:
 
