@@ -120,14 +120,14 @@ def main(_):
 
     for i in range(0, len(grouped), batch_size):
         group_split = grouped[i:i+batch_size]
-        writer = tf.python_io.TFRecordWriter(FLAGS.output_path.split('/')[-1].split('.')[0]+'_'+str(count)+'.tfrecord')
+        writer = tf.python_io.TFRecordWriter(FLAGS.output_path+'/'+FLAGS.output_path.split('/')[-1].split('.')[0]+'_'+str(count)+'.tfrecord')
         count += 1
         for group in group_split:
             tf_example = create_tf_example(group, path, label_map)
             writer.write(tf_example.SerializeToString())
 
         writer.close()
-        output_path = os.path.join(os.getcwd(), FLAGS.output_path)
+        output_path = FLAGS.output_path
         print("Successfully created the TFRecords: {}".format(output_path))
 
 
