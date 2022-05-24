@@ -9,3 +9,5 @@ proto/__pycache__/*
 pretrained_model/*
 *.tfrecord
 utils/models
+object_detection/*
+result_model/*
