@@ -76,6 +76,19 @@ python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./outp
 ```
 In this case, we created 15 TFRecord files for test and validation sets, and 110 files for training. Every file has around 200 MB.
 
+### Yolo annotations
+To train the Yolo model, it's necessary to convert the XML annotations to TXT format. We can do this by running the following command:
+```
+python3 utils/xml2yolo.py
+```
+**NOTE:** Before running the script, be sure to change the labels, images and output paths in the beginning of the script.
+
+After that, you can visualize the yolo bounding boxes in the images by running the following command:
+```
+python3 utils/show_yolo_img.py
+```
+> Both scripts were obtained from [this](https://towardsdatascience.com/convert-pascal-voc-xml-to-yolo-for-object-detection-f969811ccba5) tutorial.
+
 ## **Training the Model**
 To train the object detector, the first step is to execute the model setup, by running the following script:
 
