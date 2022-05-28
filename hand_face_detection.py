@@ -171,10 +171,10 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--saved_model_path', type=str, default='./utils/models/centernet_restnet50/saved_model')
-    parser.add_argument('--source_path', type=str)
+    parser.add_argument('--saved_model_path', type=str, default='./utils/models/saved_model')
+    parser.add_argument('--source_path', type=str, default='./utils/test_videos/asl_bench.mp4')
     parser.add_argument('--label_map_path', type=str, default='./utils/label_map.pbtxt')
-    parser.add_argument('--compute_features', type=bool, default=True)
+    parser.add_argument('--compute_features', type=bool, default=False)
     parser.add_argument('--use_docker', type=bool, default=False)
     parser.add_argument('--single_person', type=bool, default=True)
     args = parser.parse_args()
