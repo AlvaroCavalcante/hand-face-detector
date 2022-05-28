@@ -78,7 +78,17 @@ def load_data_tfrecord(tfrecord_path):
 
 
 tf_record_path = tf.io.gfile.glob(
-    '/home/alvaro/Downloads/object_detection_dataset/test_records-001/test_autonomy/*.tfrecord')
+    '/home/alvaro/Downloads/object_detection_dataset/train_records-002/train_autonomy/*.tfrecord')
+
+def count_data_items(tfrecord):
+    count = 0
+    for fn in tfrecord:
+        for _ in tf.compat.v1.python_io.tf_record_iterator(fn):
+            count += 1
+
+    return count
+
+num_imgs = count_data_items(tf_record_path)
 
 dataset = load_data_tfrecord(tf_record_path)
 
