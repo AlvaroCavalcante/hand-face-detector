@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 
 from sklearn.cluster import KMeans
 
+# Code got from here: https://github.com/tensorflow/models/blob/master/research/object_detection/colab_tutorials/generate_ssd_anchor_box_aspect_ratios_using_k_means_clustering.ipynb
 
 def xml_to_boxes(path, rescale_width=None, rescale_height=None):
     """Extracts bounding-box widths and heights from ground-truth dataset.
@@ -109,11 +110,11 @@ num_aspect_ratios = 3 # can be [2,3,4,5,6]
 
 # Tune the iterations based on the size and distribution of your dataset
 # You can check avg_iou_prec every 100 iterations to see how centroids converge
-kmeans_max_iter = 500
+kmeans_max_iter = 800
 
 # These should match the training pipeline config ('fixed_shape_resizer' param)
-width = 640
-height = 640
+width = 320
+height = 320
 
 # Get the ground-truth bounding boxes for our dataset
 bboxes = xml_to_boxes(path='/home/alvaro/Downloads/train-002/train', rescale_width=width, rescale_height=height)
