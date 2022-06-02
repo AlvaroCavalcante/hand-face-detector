@@ -1,16 +1,20 @@
 # Code got from: https://github.com/majrie/visualize_augmentation
 # All augmentations options: https://github.com/tensorflow/models/blob/master/research/object_detection/protos/preprocessor.proto
 
-from object_detection.core import preprocessor
+
 import functools
 import os
-from object_detection import inputs
-from object_detection.core import standard_fields as fields
+import time
+
 from matplotlib import pyplot as mp
 from PIL import Image
 from matplotlib import pyplot as plt
 import numpy as np
 import tensorflow as tf
+
+from object_detection.core import preprocessor
+from object_detection import inputs
+from object_detection.core import standard_fields as fields
 
 
 def load_image_into_numpy_array(image):
@@ -20,7 +24,7 @@ def load_image_into_numpy_array(image):
 
 
 # lot of augmentations have probabilities < 1 will not happen if repeated only once.
-number_of_repeats = 20
+number_of_repeats = 1
 
 image2 = Image.open(
     "/home/alvaro/Downloads/test-001/test/signer0_sample6_color_30.jpg")
@@ -29,20 +33,20 @@ image_np = load_image_into_numpy_array(image2)
 save_to_disk = True
 directory = 'visualize_augmentation'
 preprocessing_list = [
-    (preprocessor.random_horizontal_flip, {}),
+    (preprocessor.random_horizontal_flip, {'probability': 1}),
     (preprocessor.random_image_scale,
      {'min_scale_ratio': 0.8}),
-    (preprocessor.random_rgb_to_gray, {}),
+    (preprocessor.random_rgb_to_gray, {'probability': 1}),
     (preprocessor.random_adjust_brightness,
      {'max_delta': 0.25}),
     (preprocessor.random_adjust_contrast, {'max_delta': 1.3}),
     (preprocessor.random_adjust_hue, {'max_delta': 0.04}),
     (preprocessor.random_adjust_saturation, {}),
     (preprocessor.random_distort_color, {}),
-    (preprocessor.random_jitter_boxes, {}),
+    (preprocessor.random_jitter_boxes, {'jitter_mode': 'expand'}),
     (preprocessor.random_crop_image, {}),
-    (preprocessor.random_absolute_pad_image, {}),
-    (preprocessor.random_black_patches, {'probability': .35, 'size_to_image_ratio': 0.05}),
+    # (preprocessor.random_absolute_pad_image, {}),
+    (preprocessor.random_black_patches, {'probability': 1, 'size_to_image_ratio': 0.05}),
 
     #   (preprocessor.random_vertical_flip, {'probability': 1}),
     #   (preprocessor.random_rotation90, {'probability': 1}),
@@ -92,7 +96,9 @@ for preprocessing_technique in preprocessing_list:
             tf.constant(np.array([1.0], np.float32))
         }
 
+        start = time.time()
         augmented_tensor_dict = data_augmentation_fn(tensor_dict=tensor_dict)
+        print(f'Time took {time.time() - start}')
 
         plt.figure()
         plt.imshow(
