@@ -4,95 +4,164 @@ import cv2
 import time
 from utils import label_map_util
 import argparse
-from itertools import combinations
 import math
 
-physical_devices = tf.config.list_physical_devices('GPU')
-try:
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
-except:
-    print('GPU not found')
+if True:
+    tf.config.set_visible_devices([], 'GPU')
+    visible_devices = tf.config.get_visible_devices()
+    for device in visible_devices:
+        assert device.device_type != 'GPU'
+else:
+    physical_devices = tf.config.list_physical_devices('GPU')
+    try:
+        tf.config.experimental.set_memory_growth(physical_devices[0], True)
+    except:
+        print('GPU not found')
+
 
 def get_centroids(bouding_boxes):
-    centroids = []
-    for bbox in bouding_boxes:
+    centroids = {}
+    for class_name in bouding_boxes:
+        bbox = bouding_boxes.get(class_name)
+        if not bbox:
+            continue
         xmin, xmax, ymin, ymax = bbox['xmin'], bbox['xmax'], bbox['ymin'], bbox['ymax']
+
         centroid = (int((xmin+xmax)/2), int((ymin+ymax)/2))
-        centroids.append(centroid)
-    
+        centroids[class_name] = centroid
+
     return centroids
+
 
 def get_angle(opposite, adjacent_1, adjacent_2):
     # lei dos cossenos: https://pt.khanacademy.org/math/trigonometry/trig-with-general-triangles/law-of-cosines/v/law-of-cosines-missing-angle
-    cos_value = ((adjacent_1**2 + adjacent_2**2) - opposite**2) / (2*(adjacent_1*adjacent_2))
+    cos_value = ((adjacent_1**2 + adjacent_2**2) -
+                 opposite**2) / (2*(adjacent_1*adjacent_2))
     rad = math.acos(cos_value)
 
-    degrees = rad * 180 / math.pi 
+    degrees = rad * 180 / math.pi
 
     return degrees
 
-def compute_triangle_features(euclidian_distances):
-    d1, d2, d3 = euclidian_distances[0], euclidian_distances[1], euclidian_distances[2]
+
+def compute_centroids_distances(centroids, img):
+    try:
+        d1 = math.sqrt(
+            (centroids['hand_1'][0]-centroids['face'][0])**2+(centroids['hand_1'][1]-centroids['face'][1])**2)
+
+        cv2.line(img, (centroids['hand_1'][0], centroids['hand_1'][1]),
+                 (centroids['face'][0], centroids['face'][1]), (0, 255, 0), thickness=5)
+
+        d2 = math.sqrt(
+            (centroids['hand_2'][0]-centroids['face'][0])**2+(centroids['hand_2'][1]-centroids['face'][1])**2)
+
+        cv2.line(img, (centroids['hand_2'][0], centroids['hand_2'][1]),
+                 (centroids['face'][0], centroids['face'][1]), (0, 255, 0), thickness=5)
+
+        d3 = math.sqrt(
+            (centroids['hand_1'][0]-centroids['hand_2'][0])**2+(centroids['hand_1'][1]-centroids['hand_2'][1])**2)
+
+        cv2.line(img, (centroids['hand_1'][0], centroids['hand_1'][1]),
+                 (centroids['hand_2'][0], centroids['hand_2'][1]), (0, 255, 0), thickness=5)
+
+        return d1, d2, d3
+    except Exception as e:
+        print('Error to calculate centroids distances')
+        print(e)
+
+
+def get_normalized_angle(opposite, adjacent_1, adjacent_2):
+    # lei dos cossenos: https://pt.khanacademy.org/math/trigonometry/trig-with-general-triangles/law-of-cosines/v/law-of-cosines-missing-angle
+    try:
+        cos_value = ((adjacent_1**2 + adjacent_2**2) -
+                     opposite**2) / (2*(adjacent_1*adjacent_2) + 1e-10)
+        rad = math.acos(cos_value)
+
+        degrees = rad / math.pi  # rad * 180 to remove normalization [0 - 1]
+
+        return degrees
+    except Exception as e:
+        print('Error to calculate normalized angle')
+        print(e)
+
+
+def compute_triangle_features(centroids, img):
     triangle_features = {}
+    try:
+        d1, d2, d3 = compute_centroids_distances(centroids, img)
 
-    triangle_features['perimeter'] = d1 + d2 + d3
-    triangle_features['semi_perimeter'] = triangle_features['perimeter'] / 2
-    triangle_features['area'] = math.sqrt(   # Fórmula de Heron https://www.todamateria.com.br/area-do-triangulo/
-        (triangle_features['semi_perimeter'] * (triangle_features['semi_perimeter'] - d1) * (
-        triangle_features['semi_perimeter'] - d2) * (triangle_features['semi_perimeter'] - d3)))
+        triangle_features.update(
+            {'distance_1': d1, 'distance_2': d2, 'distance_3': d3})
 
-    triangle_features['ang_inter_a'] = get_angle(d3, d1, d2) 
-    triangle_features['ang_inter_b'] = get_angle(d1, d2, d3)
-    triangle_features['ang_inter_c'] = 180.0 - (triangle_features['ang_inter_a'] + triangle_features['ang_inter_b'])
+        triangle_features['perimeter'] = d1 + d2 + d3
+        triangle_features['semi_perimeter'] = triangle_features['perimeter'] / 2
+        triangle_features['area'] = math.sqrt(   # Fórmula de Heron https://www.todamateria.com.br/area-do-triangulo/
+            (triangle_features['semi_perimeter'] * (triangle_features['semi_perimeter'] - d1) * (
+                triangle_features['semi_perimeter'] - d2) * (triangle_features['semi_perimeter'] - d3)))
 
-    # teorema dos Ângulos externos https://pt.wikipedia.org/wiki/Teorema_dos_%C3%A2ngulos_externos
-    triangle_features['ang_ext_a'] = triangle_features['ang_inter_b'] + triangle_features['ang_inter_c']
-    triangle_features['ang_ext_b'] = triangle_features['ang_inter_a'] + triangle_features['ang_inter_c']
-    triangle_features['ang_ext_c'] = triangle_features['ang_inter_b'] + triangle_features['ang_inter_a']
+        # avoid 0 division
+        triangle_features['height'] = 2 * \
+            triangle_features['area'] / (d3 + 1e-10)
+
+        triangle_features['ang_inter_a'] = get_normalized_angle(d3, d1, d2)
+        triangle_features['ang_inter_b'] = get_normalized_angle(d1, d2, d3)
+        triangle_features['ang_inter_c'] = 1 - \
+            (triangle_features['ang_inter_a'] +
+             triangle_features['ang_inter_b'])
+
+        # teorema dos Ângulos externos https://pt.wikipedia.org/wiki/Teorema_dos_%C3%A2ngulos_externos
+        triangle_features['ang_ext_a'] = triangle_features['ang_inter_b'] + \
+            triangle_features['ang_inter_c']
+        triangle_features['ang_ext_b'] = triangle_features['ang_inter_a'] + \
+            triangle_features['ang_inter_c']
+        triangle_features['ang_ext_c'] = triangle_features['ang_inter_b'] + \
+            triangle_features['ang_inter_a']
+    except Exception as e:
+        print('Error to calculate triangle features')
+        print(e)
 
     return triangle_features
 
+
 def compute_features_and_draw_lines(bouding_boxes, img):
-    centroids = get_centroids(bouding_boxes)
-    euclidian_distances = []
-
-    for cc in combinations(centroids, 2):
-        centroid_1 = cc[0]
-        centroid_2 = cc[1]
-        cv2.line(img, (centroid_1[0], centroid_1[1]), (centroid_2[0], centroid_2[1]), (0, 255, 0), thickness=5)
-        distance = math.sqrt((centroid_1[0]-centroid_2[0])**2+(centroid_1[1]-centroid_2[1])**2)
-        euclidian_distances.append(distance)
-
     triangle_features = {}
+    centroids = get_centroids(bouding_boxes)
     if len(centroids) == 3:
-        triangle_features = compute_triangle_features(euclidian_distances)
+        triangle_features = compute_triangle_features(centroids, img)
 
-    return img, euclidian_distances, triangle_features
+    return img, triangle_features
 
-def draw_boxes_on_img(image_np_with_detections, label_map_path, scores, classes, boxes, heigth, width, single_person):
+
+def draw_boxes_on_img(image_np_with_detections, label_map_path, scores, classes, boxes, heigth, width):
     category_index = label_map_util.create_category_index_from_labelmap(label_map_path,
-                                                            use_display_name=True)
+                                                                        use_display_name=True)
 
-    output_bboxes = []
+    output_bboxes = {'face': None, 'hand_1': None, 'hand_2': None}
     hand_counter = 2
     face_counter = 1
-    for i in np.where(scores > .4)[0]:
+    for i in np.where(scores > .5)[0]:
         class_name = category_index[classes[i]].get('name')
 
-        if single_person:
-            if face_counter == 0 and hand_counter == 0:
-                return image_np_with_detections, output_bboxes      
-            if class_name == 'face' and face_counter == 0:
-                continue
-            elif class_name == 'hand' and hand_counter == 0:
-                continue
+        if face_counter == 0 and hand_counter == 0:
+            return image_np_with_detections, output_bboxes
+        elif class_name == 'face' and face_counter == 0:
+            continue
+        elif class_name == 'hand' and hand_counter == 0:
+            continue
+
+        class_name = 'hand_' + \
+            str(hand_counter) if class_name == 'hand' else class_name
 
         xmin, xmax, ymin, ymax = boxes[i][1], boxes[i][3], boxes[i][0], boxes[i][2]
-        xmin, xmax, ymin, ymax = int(xmin * width), int(xmax * width), int(ymin * heigth), int(ymax * heigth)
-        output_bboxes.append({'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax})
-        
-        color = (0,255,0) if class_name == 'face' else (255,0,0)
-        cv2.rectangle(image_np_with_detections, (xmin, ymin), (xmax, ymax), color, 2)
+        xmin, xmax, ymin, ymax = int(
+            xmin * width), int(xmax * width), int(ymin * heigth), int(ymax * heigth)
+
+        output_bboxes[class_name] = {'xmin': xmin,
+                                     'xmax': xmax, 'ymin': ymin, 'ymax': ymax}
+
+        color = (0, 255, 0) if class_name == 'face' else (255, 0, 0)
+        cv2.rectangle(image_np_with_detections,
+                      (xmin, ymin), (xmax, ymax), color, 2)
 
         if class_name == 'face':
             face_counter -= 1
@@ -101,7 +170,8 @@ def draw_boxes_on_img(image_np_with_detections, label_map_path, scores, classes,
 
     return image_np_with_detections, output_bboxes
 
-def infer_images(image, output_img, label_map_path, detect_fn, heigth, width, single_person):
+
+def infer_images(image, output_img, label_map_path, detect_fn, heigth, width):
     image_np = np.array(image)
     input_tensor = tf.convert_to_tensor(image_np)
     input_tensor = input_tensor[tf.newaxis, ...]
@@ -110,20 +180,22 @@ def infer_images(image, output_img, label_map_path, detect_fn, heigth, width, si
 
     num_detections = int(detections.pop('num_detections'))
     detections = {key: value[0, :num_detections].numpy()
-                for key, value in detections.items()}
+                  for key, value in detections.items()}
     detections['num_detections'] = num_detections
 
-    detections['detection_classes'] = detections['detection_classes'].astype(np.int64)
+    detections['detection_classes'] = detections['detection_classes'].astype(
+        np.int64)
 
     image_np_with_detections, bouding_boxes = draw_boxes_on_img(
-        output_img, 
-        label_map_path, 
-        detections['detection_scores'], 
-        detections['detection_classes'], 
+        output_img,
+        label_map_path,
+        detections['detection_scores'],
+        detections['detection_classes'],
         detections['detection_boxes'],
-        heigth, width, single_person)
+        heigth, width)
 
     return image_np_with_detections, bouding_boxes
+
 
 def main(args):
     detect_fn = tf.saved_model.load(args.saved_model_path)
@@ -147,10 +219,12 @@ def main(args):
         heigth, width = output_img.shape[0], output_img.shape[1]
 
         frame = cv2.resize(frame, (320, 320)).astype('uint8')
-        output_img, bouding_boxes = infer_images(frame, output_img, args.label_map_path, detect_fn, heigth, width, args.single_person)
+        output_img, bouding_boxes = infer_images(
+            frame, output_img, args.label_map_path, detect_fn, heigth, width)
 
         if args.compute_features:
-            output_img, distances, triangle_features = compute_features_and_draw_lines(bouding_boxes, output_img)
+            output_img, triangle_features = compute_features_and_draw_lines(
+                bouding_boxes, output_img)
 
         count += 1
         if (time.time() - start_time) > 1:
@@ -169,14 +243,17 @@ def main(args):
     print(fps_hist)
     print('Mean FPS: ', str(sum(fps_hist) / len(fps_hist)))
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--saved_model_path', type=str, default='./utils/models/saved_model')
-    parser.add_argument('--source_path', type=str, default='./utils/test_videos/asl_bench.mp4')
-    parser.add_argument('--label_map_path', type=str, default='./utils/label_map.pbtxt')
-    parser.add_argument('--compute_features', type=bool, default=False)
+    parser.add_argument('--saved_model_path', type=str,
+                        default='./utils/models/saved_model_efficient_det_d1')
+    parser.add_argument('--source_path', type=str,
+                        default='./utils/test_videos/asl_bench.mp4')
+    parser.add_argument('--label_map_path', type=str,
+                        default='./utils/label_map.pbtxt')
+    parser.add_argument('--compute_features', type=bool, default=True)
     parser.add_argument('--use_docker', type=bool, default=False)
-    parser.add_argument('--single_person', type=bool, default=True)
     args = parser.parse_args()
 
     main(args)
