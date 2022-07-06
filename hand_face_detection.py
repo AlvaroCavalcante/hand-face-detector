@@ -52,14 +52,25 @@ def compute_centroids_distances(centroids, img):
         cv2.line(img, (centroids['hand_1'][0], centroids['hand_1'][1]),
                  (centroids['face'][0], centroids['face'][1]), (0, 255, 0), thickness=5)
 
+        pos = (centroids['hand_1'][0]+centroids['face'][0])//2, (centroids['hand_1'][1]+centroids['face'][1])//2
+        cv2.putText(img, str(int(d1)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
+                   1, color=(255, 0, 0), thickness=2)
+
         d2 = math.sqrt(
             (centroids['hand_2'][0]-centroids['face'][0])**2+(centroids['hand_2'][1]-centroids['face'][1])**2)
 
+        pos = (centroids['hand_2'][0]+centroids['face'][0])//2, (centroids['hand_2'][1]+centroids['face'][1])//2
+        cv2.putText(img, str(int(d2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
+                   1, color=(255, 0, 0), thickness=2)
         cv2.line(img, (centroids['hand_2'][0], centroids['hand_2'][1]),
                  (centroids['face'][0], centroids['face'][1]), (0, 255, 0), thickness=5)
 
         d3 = math.sqrt(
             (centroids['hand_1'][0]-centroids['hand_2'][0])**2+(centroids['hand_1'][1]-centroids['hand_2'][1])**2)
+
+        pos = (centroids['hand_2'][0]+centroids['hand_1'][0])//2, (centroids['hand_2'][1]+centroids['hand_1'][1])//2
+        cv2.putText(img, str(int(d3)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
+                   1, color=(255, 0, 0), thickness=2)
 
         cv2.line(img, (centroids['hand_1'][0], centroids['hand_1'][1]),
                  (centroids['hand_2'][0], centroids['hand_2'][1]), (0, 255, 0), thickness=5)
