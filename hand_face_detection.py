@@ -120,6 +120,18 @@ def compute_triangle_features(centroids, img):
             (triangle_features['ang_inter_a'] +
              triangle_features['ang_inter_b'])
 
+        pos = (centroids['face'][0]+20, centroids['face'][1]+20)
+        cv2.putText(img, str(round(triangle_features['ang_inter_a'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
+                   1, color=(255, 0, 0), thickness=2)
+
+        pos = (centroids['hand_2'][0]+20, centroids['hand_2'][1]+20)
+        cv2.putText(img, str(round(triangle_features['ang_inter_b'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
+                   1, color=(255, 0, 0), thickness=2)
+
+        pos = (centroids['hand_1'][0]+20, centroids['hand_1'][1]+20)
+        cv2.putText(img, str(round(triangle_features['ang_inter_c'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
+                   1, color=(255, 0, 0), thickness=2)
+
         # teorema dos Ângulos externos https://pt.wikipedia.org/wiki/Teorema_dos_%C3%A2ngulos_externos
         triangle_features['ang_ext_a'] = triangle_features['ang_inter_b'] + \
             triangle_features['ang_inter_c']
