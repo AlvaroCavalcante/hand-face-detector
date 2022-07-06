@@ -54,14 +54,14 @@ def compute_centroids_distances(centroids, img):
 
         pos = (centroids['hand_1'][0]+centroids['face'][0])//2, (centroids['hand_1'][1]+centroids['face'][1])//2
         cv2.putText(img, str(int(d1)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(255, 0, 0), thickness=2)
+                   1, color=(216, 139, 37), thickness=2)
 
         d2 = math.sqrt(
             (centroids['hand_2'][0]-centroids['face'][0])**2+(centroids['hand_2'][1]-centroids['face'][1])**2)
 
         pos = (centroids['hand_2'][0]+centroids['face'][0])//2, (centroids['hand_2'][1]+centroids['face'][1])//2
         cv2.putText(img, str(int(d2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(255, 0, 0), thickness=2)
+                   1, color=(216, 139, 37), thickness=2)
         cv2.line(img, (centroids['hand_2'][0], centroids['hand_2'][1]),
                  (centroids['face'][0], centroids['face'][1]), (0, 255, 0), thickness=5)
 
@@ -70,7 +70,7 @@ def compute_centroids_distances(centroids, img):
 
         pos = (centroids['hand_2'][0]+centroids['hand_1'][0])//2, (centroids['hand_2'][1]+centroids['hand_1'][1])//2
         cv2.putText(img, str(int(d3)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(255, 0, 0), thickness=2)
+                   1, color=(216, 139, 37), thickness=2)
 
         cv2.line(img, (centroids['hand_1'][0], centroids['hand_1'][1]),
                  (centroids['hand_2'][0], centroids['hand_2'][1]), (0, 255, 0), thickness=5)
@@ -122,15 +122,15 @@ def compute_triangle_features(centroids, img):
 
         pos = (centroids['face'][0]+20, centroids['face'][1]+20)
         cv2.putText(img, str(round(triangle_features['ang_inter_a'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(255, 0, 0), thickness=2)
+                   1, color=(0, 0, 255), thickness=2)
 
         pos = (centroids['hand_2'][0]+20, centroids['hand_2'][1]+20)
         cv2.putText(img, str(round(triangle_features['ang_inter_b'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(255, 0, 0), thickness=2)
+                   1, color=(0, 0, 255), thickness=2)
 
         pos = (centroids['hand_1'][0]+20, centroids['hand_1'][1]+20)
         cv2.putText(img, str(round(triangle_features['ang_inter_c'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(255, 0, 0), thickness=2)
+                   1, color=(0, 0, 255), thickness=2)
 
         # teorema dos Ângulos externos https://pt.wikipedia.org/wiki/Teorema_dos_%C3%A2ngulos_externos
         triangle_features['ang_ext_a'] = triangle_features['ang_inter_b'] + \
