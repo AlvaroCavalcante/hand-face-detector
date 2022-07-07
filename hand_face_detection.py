@@ -5,6 +5,7 @@ import time
 from utils import label_map_util
 import argparse
 import math
+import os
 
 if True:
     tf.config.set_visible_devices([], 'GPU')
@@ -52,25 +53,14 @@ def compute_centroids_distances(centroids, img):
         cv2.line(img, (centroids['hand_1'][0], centroids['hand_1'][1]),
                  (centroids['face'][0], centroids['face'][1]), (0, 255, 0), thickness=5)
 
-        pos = (centroids['hand_1'][0]+centroids['face'][0])//2, (centroids['hand_1'][1]+centroids['face'][1])//2
-        cv2.putText(img, str(int(d1)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(216, 139, 37), thickness=2)
-
         d2 = math.sqrt(
             (centroids['hand_2'][0]-centroids['face'][0])**2+(centroids['hand_2'][1]-centroids['face'][1])**2)
 
-        pos = (centroids['hand_2'][0]+centroids['face'][0])//2, (centroids['hand_2'][1]+centroids['face'][1])//2
-        cv2.putText(img, str(int(d2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(216, 139, 37), thickness=2)
         cv2.line(img, (centroids['hand_2'][0], centroids['hand_2'][1]),
                  (centroids['face'][0], centroids['face'][1]), (0, 255, 0), thickness=5)
 
         d3 = math.sqrt(
             (centroids['hand_1'][0]-centroids['hand_2'][0])**2+(centroids['hand_1'][1]-centroids['hand_2'][1])**2)
-
-        pos = (centroids['hand_2'][0]+centroids['hand_1'][0])//2, (centroids['hand_2'][1]+centroids['hand_1'][1])//2
-        cv2.putText(img, str(int(d3)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(216, 139, 37), thickness=2)
 
         cv2.line(img, (centroids['hand_1'][0], centroids['hand_1'][1]),
                  (centroids['hand_2'][0], centroids['hand_2'][1]), (0, 255, 0), thickness=5)
@@ -96,15 +86,38 @@ def get_normalized_angle(opposite, adjacent_1, adjacent_2):
         print(e)
 
 
+def draw_lines_and_text(img, d1, d2, d3, centroids):
+    pos = (centroids['hand_1'][0]+centroids['face'][0]
+           )//2, (centroids['hand_1'][1]+centroids['face'][1])//2
+
+    cv2.putText(img, str(round(d1, 3)), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                1, color=(216, 139, 37), thickness=2)
+
+    pos = (centroids['hand_2'][0]+centroids['face'][0]
+           )//2, (centroids['hand_2'][1]+centroids['face'][1])//2
+    cv2.putText(img, str(round(d2, 3)), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                1, color=(216, 139, 37), thickness=2)
+
+    pos = (centroids['hand_2'][0]+centroids['hand_1'][0]
+           )//2, (centroids['hand_2'][1]+centroids['hand_1'][1])//2
+    cv2.putText(img, str(round(d3, 3)), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                1, color=(216, 139, 37), thickness=2)
+
+
 def compute_triangle_features(centroids, img):
     triangle_features = {}
     try:
         d1, d2, d3 = compute_centroids_distances(centroids, img)
+        perimeter = d1 + d2 + d3
+        triangle_features['perimeter'] = perimeter
+
+        d1, d2, d3 = d1/perimeter, d2/perimeter, d3/perimeter
+
+        draw_lines_and_text(img, d1, d2, d3, centroids)
 
         triangle_features.update(
             {'distance_1': d1, 'distance_2': d2, 'distance_3': d3})
 
-        triangle_features['perimeter'] = d1 + d2 + d3
         triangle_features['semi_perimeter'] = triangle_features['perimeter'] / 2
         triangle_features['area'] = math.sqrt(   # Fórmula de Heron https://www.todamateria.com.br/area-do-triangulo/
             (triangle_features['semi_perimeter'] * (triangle_features['semi_perimeter'] - d1) * (
@@ -121,16 +134,16 @@ def compute_triangle_features(centroids, img):
              triangle_features['ang_inter_b'])
 
         pos = (centroids['face'][0]+20, centroids['face'][1]+20)
-        cv2.putText(img, str(round(triangle_features['ang_inter_a'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(0, 0, 255), thickness=2)
+        cv2.putText(img, str(round(triangle_features['ang_inter_a'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                    1, color=(0, 0, 255), thickness=2)
 
         pos = (centroids['hand_2'][0]+20, centroids['hand_2'][1]+20)
-        cv2.putText(img, str(round(triangle_features['ang_inter_b'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(0, 0, 255), thickness=2)
+        cv2.putText(img, str(round(triangle_features['ang_inter_b'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                    1, color=(0, 0, 255), thickness=2)
 
         pos = (centroids['hand_1'][0]+20, centroids['hand_1'][1]+20)
-        cv2.putText(img, str(round(triangle_features['ang_inter_c'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, color=(0, 0, 255), thickness=2)
+        cv2.putText(img, str(round(triangle_features['ang_inter_c'], 2)), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                    1, color=(0, 0, 255), thickness=2)
 
         # teorema dos Ângulos externos https://pt.wikipedia.org/wiki/Teorema_dos_%C3%A2ngulos_externos
         triangle_features['ang_ext_a'] = triangle_features['ang_inter_b'] + \
@@ -224,18 +237,15 @@ def main(args):
     detect_fn = tf.saved_model.load(args.saved_model_path)
 
     source = args.source_path if args.source_path else 0
-    cap = cv2.VideoCapture(source)
+    # cap = cv2.VideoCapture(source)
 
     count = 0
     fps = str(0)
     start_time = time.time()
     fps_hist = []
 
-    while True:
-        got_frame, frame = cap.read()
-
-        if not got_frame:
-            break
+    for file in os.listdir(source):
+        frame = cv2.imread(source+file)
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         output_img = frame.copy()
@@ -259,6 +269,7 @@ def main(args):
 
         if not args.use_docker:
             cv2.imshow('Frame', cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
+            cv2.imwrite(file, cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
                 break
@@ -272,7 +283,7 @@ if __name__ == '__main__':
     parser.add_argument('--saved_model_path', type=str,
                         default='./utils/models/saved_model_efficient_det_d1')
     parser.add_argument('--source_path', type=str,
-                        default='./utils/test_videos/asl_bench.mp4')
+                        default='./utils/test_images/')
     parser.add_argument('--label_map_path', type=str,
                         default='./utils/label_map.pbtxt')
     parser.add_argument('--compute_features', type=bool, default=True)
