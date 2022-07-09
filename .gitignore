@@ -11,3 +11,5 @@ pretrained_model/*
 utils/models
 object_detection/*
 result_model/*
+*.jpg
+*.jpeg
