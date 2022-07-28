@@ -6,11 +6,10 @@ import functools
 import os
 import time
 
-from matplotlib import pyplot as mp
 from PIL import Image
-from matplotlib import pyplot as plt
 import numpy as np
 import tensorflow as tf
+import cv2
 
 from object_detection.core import preprocessor
 from object_detection import inputs
@@ -27,12 +26,13 @@ def load_image_into_numpy_array(image):
 number_of_repeats = 1
 
 image2 = Image.open(
-    "/home/alvaro/Downloads/test-001/test/signer0_sample6_color_30.jpg")
+    "/home/alvaro/Downloads/DATASETS/test-001/test/signer0_sample6_color_30.jpg")
 image_np = load_image_into_numpy_array(image2)
 
 save_to_disk = True
 directory = 'visualize_augmentation'
 preprocessing_list = [
+    None,
     (preprocessor.random_horizontal_flip, {'probability': 1}),
     (preprocessor.random_image_scale,
      {'min_scale_ratio': 0.8}),
@@ -100,18 +100,13 @@ for preprocessing_technique in preprocessing_list:
         augmented_tensor_dict = data_augmentation_fn(tensor_dict=tensor_dict)
         print(f'Time took {time.time() - start}')
 
-        plt.figure()
-        plt.imshow(
-            augmented_tensor_dict[fields.InputDataFields.image].numpy().astype(int))
-        plt.show()
+        img_to_save = augmented_tensor_dict[fields.InputDataFields.image].numpy().astype('uint8')
 
         if save_to_disk:
             if not os.path.exists(directory):
                 os.makedirs(directory)
             if preprocessing_technique is not None:
-                mp.savefig(directory + '/augmentation_'+str(
-                    preprocessing_technique[0].__name__)+'_'+str(i)+'.png', dpi=300,  bbox_inches='tight')
+                cv2.imwrite(directory + '/augmentation_'+str(
+                    preprocessing_technique[0].__name__)+'_'+str(i)+'.png', cv2.cvtColor(img_to_save, cv2.COLOR_BGR2RGB))
             else:
-                mp.savefig(directory + '/no_augmentation.png',
-                           dpi=300,  bbox_inches='tight')
-        plt.close('all')
+                cv2.imwrite(directory + '/no_augmentation.png', cv2.cvtColor(img_to_save, cv2.COLOR_BGR2RGB))
