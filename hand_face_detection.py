@@ -1,11 +1,13 @@
+import argparse
+import math
+import time
+
 import tensorflow as tf
 import numpy as np
 import cv2
-import time
+
 from utils import label_map_util
-import argparse
-import math
-import os
+
 
 if True:
     tf.config.set_visible_devices([], 'GPU')
@@ -110,6 +112,15 @@ def compute_triangle_features(centroids, img):
         d1, d2, d3 = compute_centroids_distances(centroids, img)
         perimeter = d1 + d2 + d3
         triangle_features['perimeter'] = perimeter
+        triangle_features['semi_perimeter'] = triangle_features['perimeter'] / 2
+
+        triangle_features['area'] = math.sqrt(   # Fórmula de Heron https://www.todamateria.com.br/area-do-triangulo/
+            (triangle_features['semi_perimeter'] * (triangle_features['semi_perimeter'] - d1) * (
+                triangle_features['semi_perimeter'] - d2) * (triangle_features['semi_perimeter'] - d3)))
+
+        # avoid 0 division
+        triangle_features['height'] = 2 * \
+            triangle_features['area'] / (d3 + 1e-10)
 
         d1, d2, d3 = d1/perimeter, d2/perimeter, d3/perimeter
 
@@ -118,14 +129,20 @@ def compute_triangle_features(centroids, img):
         triangle_features.update(
             {'distance_1': d1, 'distance_2': d2, 'distance_3': d3})
 
-        triangle_features['semi_perimeter'] = triangle_features['perimeter'] / 2
-        triangle_features['area'] = math.sqrt(   # Fórmula de Heron https://www.todamateria.com.br/area-do-triangulo/
-            (triangle_features['semi_perimeter'] * (triangle_features['semi_perimeter'] - d1) * (
-                triangle_features['semi_perimeter'] - d2) * (triangle_features['semi_perimeter'] - d3)))
+        triangle_features['norm_area'] = math.sqrt(   # Fórmula de Heron https://www.todamateria.com.br/area-do-triangulo/
+            (0.5 * (0.5 - d1) * (
+                0.5 - d2) * (0.5 - d3)))
 
-        # avoid 0 division
-        triangle_features['height'] = 2 * \
-            triangle_features['area'] / (d3 + 1e-10)
+        triangle_features['norm_height'] = 2 * \
+            triangle_features['norm_area'] / (d3 + 1e-10)
+
+        pos = (30, 30)
+        cv2.putText(img, 'A:'+str(round(triangle_features['norm_area'], 5)), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                    1, color=(0, 0, 255), thickness=5)
+
+        pos = (30, 80)
+        cv2.putText(img, 'H:'+str(round(triangle_features['norm_height'], 5)), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                    1, color=(0, 0, 255), thickness=5)
 
         triangle_features['ang_inter_a'] = get_normalized_angle(d3, d1, d2)
         triangle_features['ang_inter_b'] = get_normalized_angle(d1, d2, d3)
@@ -234,18 +251,23 @@ def infer_images(image, output_img, label_map_path, detect_fn, heigth, width):
 
 
 def main(args):
+    print('Loading object detection model...')
     detect_fn = tf.saved_model.load(args.saved_model_path)
+    print('Model loaded')
 
     source = args.source_path if args.source_path else 0
-    # cap = cv2.VideoCapture(source)
+    cap = cv2.VideoCapture(source)
 
     count = 0
     fps = str(0)
     start_time = time.time()
     fps_hist = []
 
-    for file in os.listdir(source):
-        frame = cv2.imread(source+file)
+    while True:
+        got_frame, frame = cap.read()
+
+        if not got_frame:
+            break
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         output_img = frame.copy()
@@ -269,7 +291,7 @@ def main(args):
 
         if not args.use_docker:
             cv2.imshow('Frame', cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
-            cv2.imwrite(file, cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
+            # cv2.imwrite(file, cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
                 break
@@ -281,9 +303,8 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--saved_model_path', type=str,
-                        default='./utils/models/saved_model_efficient_det_d1')
-    parser.add_argument('--source_path', type=str,
-                        default='./utils/test_images/')
+                        default='./utils/models/saved_model_ssd_fpn_320x320_autsl')
+    parser.add_argument('--source_path', type=str)
     parser.add_argument('--label_map_path', type=str,
                         default='./utils/label_map.pbtxt')
     parser.add_argument('--compute_features', type=bool, default=True)
