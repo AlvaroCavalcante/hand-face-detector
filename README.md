@@ -100,7 +100,7 @@ Where the model name and download url is taken from [TF Zoo](https://github.com/
 
 After the model setup, you just need to run the following code to start the detector training:
 ```
-python /models/research/object_detection/model_main_tf2.py \
+python models/research/object_detection/model_main_tf2.py \
     --pipeline_config_path={pipeline_fname} \
     --model_dir={model_dir} \
     --alsologtostderr \
@@ -108,8 +108,32 @@ python /models/research/object_detection/model_main_tf2.py \
     --checkpoint_every_n=1000 \
     --num_eval_steps={num_eval_steps}
 ```
-
 The model training was conducted on Google Colab. The notebook can be found [here](https://colab.research.google.com/drive/1209hYjuj449H-H_jfXLMdvnSgHYWgsq0?usp=sharing).
+
+## **Evaluating model performance**
+To evaluate the model performance during the training step, you just need to run the following command:
+
+```
+python models/research/object_detection/model_main_tf2.py \
+    --pipeline_config_path={pipeline_fname} \
+    --model_dir={model_dir} \
+    --alsologtostderr \
+    --eval_on_train_data=True \
+    --checkpoint_dir={model_dir} \
+```
+
+When specifying the **checkpoint_dir** parameter, the last checkpoint will be used to evaluate the model performance on eval data.
+
+## Exporting trained model
+After training a great model, you probably would like to export it into the savedModel format to use it in the inference code. To do so, just run the following command:
+
+```
+python models/research/object_detection/exporter_main_v2.py \
+    --input_type image_tensor \
+    --pipeline_config_path {pipeline_fname} \
+    --trained_checkpoint_dir {model_dir} \
+    --output_directory {output_path}
+```
 
 ## Testing Model Results
 To verify the model working, we need to run the **hand_face_detection.py** script, with the following arguments:
