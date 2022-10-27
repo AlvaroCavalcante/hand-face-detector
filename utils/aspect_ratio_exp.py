@@ -106,18 +106,18 @@ def kmeans_aspect_ratios(bboxes, kmeans_max_iter, num_aspect_ratios):
     return aspect_ratios, avg_iou_perc
 
 
-num_aspect_ratios = 3 # can be [2,3,4,5,6]
+num_aspect_ratios = 2 # can be [2,3,4,5,6]
 
 # Tune the iterations based on the size and distribution of your dataset
 # You can check avg_iou_prec every 100 iterations to see how centroids converge
 kmeans_max_iter = 800
 
 # These should match the training pipeline config ('fixed_shape_resizer' param)
-width = 320
-height = 320
+width = 512
+height = 512
 
 # Get the ground-truth bounding boxes for our dataset
-bboxes = xml_to_boxes(path='/home/alvaro/Downloads/train-002/train', rescale_width=width, rescale_height=height)
+bboxes = xml_to_boxes(path='/home/alvaro/Downloads/new_object_detection/train', rescale_width=width, rescale_height=height)
 
 aspect_ratios, avg_iou_perc =  kmeans_aspect_ratios(
                                       bboxes=bboxes,
