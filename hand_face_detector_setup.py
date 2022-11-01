@@ -102,7 +102,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--label_map_path', type=str, default='/home/alvaro/Documentos/body-detection/utils/label_map.pbtxt')
+    parser.add_argument('--label_map_path', type=str, default='./utils/label_map.pbtxt')
     parser.add_argument('--n_steps', type=int, default=4000)
     parser.add_argument('--n_eval_steps', type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=10)
