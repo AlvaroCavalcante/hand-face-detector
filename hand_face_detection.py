@@ -9,17 +9,20 @@ import cv2
 from utils import label_map_util
 
 
-if True:
-    tf.config.set_visible_devices([], 'GPU')
-    visible_devices = tf.config.get_visible_devices()
-    for device in visible_devices:
-        assert device.device_type != 'GPU'
-else:
-    physical_devices = tf.config.list_physical_devices('GPU')
-    try:
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    except:
-        print('GPU not found')
+def set_device(device: str):
+    print('Setting device...')
+
+    if device == 'cpu':
+        tf.config.set_visible_devices([], 'GPU')
+        visible_devices = tf.config.get_visible_devices()
+        for devices in visible_devices:
+            assert devices.device_type != 'GPU'
+    else:
+        physical_devices = tf.config.list_physical_devices('GPU')
+        try:
+            tf.config.experimental.set_memory_growth(physical_devices[0], True)
+        except:
+            print('GPU not found')
 
 
 def get_centroids(bouding_boxes):
@@ -251,11 +254,12 @@ def infer_images(image, output_img, label_map_path, detect_fn, heigth, width):
 
 
 def main(args):
+    set_device(args.device)
     print('Loading object detection model...')
     detect_fn = tf.saved_model.load(args.saved_model_path)
     print('Model loaded')
 
-    source = args.source_path if args.source_path else 0
+    source = args.source_path if args.source_path else 1
     cap = cv2.VideoCapture(source)
 
     count = 0
@@ -273,7 +277,8 @@ def main(args):
         output_img = frame.copy()
         heigth, width = output_img.shape[0], output_img.shape[1]
 
-        frame = cv2.resize(frame, (320, 320)).astype('uint8')
+        frame = cv2.resize(
+            frame, (int(args.img_res), int(args.img_res))).astype('uint8')
         output_img, bouding_boxes = infer_images(
             frame, output_img, args.label_map_path, detect_fn, heigth, width)
 
@@ -303,12 +308,14 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--saved_model_path', type=str,
-                        default='./utils/models/saved_model_ssd_fpn_320x320_autsl')
+                        default='./utils/saved_models/centernet_mobilenet_v2_fpn/saved_model/')
     parser.add_argument('--source_path', type=str)
     parser.add_argument('--label_map_path', type=str,
                         default='./utils/label_map.pbtxt')
     parser.add_argument('--compute_features', type=bool, default=True)
     parser.add_argument('--use_docker', type=bool, default=False)
+    parser.add_argument('--img_res', type=str, default='512')
+    parser.add_argument('--device', type=str, default='cpu')
     args = parser.parse_args()
 
     main(args)
