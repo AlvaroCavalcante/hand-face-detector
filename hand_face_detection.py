@@ -262,10 +262,8 @@ def main(args):
     source = args.source_path if args.source_path else 1
     cap = cv2.VideoCapture(source)
 
-    count = 0
-    fps = str(0)
+    inference_speed = []
     start_time = time.time()
-    fps_hist = []
 
     while True:
         got_frame, frame = cap.read()
@@ -279,20 +277,22 @@ def main(args):
 
         frame = cv2.resize(
             frame, (int(args.img_res), int(args.img_res))).astype('uint8')
+
+        start = time.time()
         output_img, bouding_boxes = infer_images(
             frame, output_img, args.label_map_path, detect_fn, heigth, width)
+        inference_speed.append(time.time() - start)
 
         if args.compute_features:
             output_img, triangle_features = compute_features_and_draw_lines(
                 bouding_boxes, output_img)
 
-        count += 1
         if (time.time() - start_time) > 1:
-            fps = int(count / (time.time() - start_time))
-            print('detection FPS: {}'.format(str(fps)))
-            count = 0
+            mean_inf_speed_ms = 1E3 * np.mean(inference_speed)
+            print('inference ms: {}'.format(round(mean_inf_speed_ms, 2)))
+            print('inference FPS: {}'.format(
+                round(1000 / mean_inf_speed_ms, 2)))
             start_time = time.time()
-            fps_hist.append(fps)
 
         if not args.use_docker:
             cv2.imshow('Frame', cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
@@ -301,15 +301,14 @@ def main(args):
             if key == ord('q'):
                 break
 
-    print(fps_hist)
-    print('Mean FPS: ', str(sum(fps_hist) / len(fps_hist)))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--saved_model_path', type=str,
                         default='./utils/saved_models/centernet_mobilenet_v2_fpn/saved_model/')
-    parser.add_argument('--source_path', type=str)
+    parser.add_argument('--source_path', type=str,
+                        default='utils/test_videos/asl_bench.mp4')
     parser.add_argument('--label_map_path', type=str,
                         default='./utils/label_map.pbtxt')
     parser.add_argument('--compute_features', type=bool, default=True)
