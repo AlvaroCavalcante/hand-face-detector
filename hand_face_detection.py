@@ -13,11 +13,13 @@ def set_device(device: str):
     print('Setting device...')
 
     if device == 'cpu':
+        print('Running model on CPU')
         tf.config.set_visible_devices([], 'GPU')
         visible_devices = tf.config.get_visible_devices()
         for devices in visible_devices:
             assert devices.device_type != 'GPU'
     else:
+        print('Running model on GPU')
         physical_devices = tf.config.list_physical_devices('GPU')
         try:
             tf.config.experimental.set_memory_growth(physical_devices[0], True)
