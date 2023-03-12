@@ -1,49 +1,10 @@
 # Hand and Face Detector for Sign Language
 
-Detecting the hands and the face is an important task for sign language, once those channels have most part of the information used to discriminate the sign.
+Detecting the hands and the face is an important task for sign language, once those channels have most part of the information used to discriminate signs.
 
 Based on this, this repository contains all the documentation that supports the project of a large-scale object detector for hands and faces. Besides the source code, you will find the pretrained models, datasets, and other useful resources for this context.
 
-Although this object detection model and dataset could be used for other problems, the main application was done for sign language. That's why most part of the dataset used to train this model was based on people executing signs. 
-
-
-## General Hand and Face Dataset
-The initial dataset used in this research was actually a collection of 8 different open-source datasets, containing more than 50,000 annotated frames, as described in the [author's paper](https://autonomy.cs.sfu.ca/doc/mohaimenian_iros2018.pdf). The reference and description of each dataset can be found below:
-
-|  Dataset | Frames  | Hands  | Faces  |
-|---|---|---|---|
-| [Autonomy Hands and Faces](https://autonomy.cs.sfu.ca/doc/mohaimenian_iros2018.pdf)   | 16,883  |  34,588 | 18,838 |
-|  [Mittal](https://www.robots.ox.ac.uk/~vgg/publications/2011/Mittal11/mittal11.pdf) |  5,628  | 13,050  | 11,045  |
-|  [Sensors](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4168488/) | 1,251  |  2,502 | 1,251  |
-|  [Pascal VOC](https://homepages.inf.ed.ac.uk/ckiw/postscript/ijcv_voc09.pdf) | 582  | 1,532  | 1,055  |
-|  [Helen](https://openaccess.thecvf.com/content_iccv_2013/papers/Zhou_Exemplar-Based_Graph_Matching_2013_ICCV_paper.pdf) | 2,330  | 700  |  2,909 |
-|  [VIVA](https://ieeexplore.ieee.org/abstract/document/7313566) |  5,500 | 13,229  | 296  |
-|  [EgoHands](https://ieeexplore.ieee.org/document/7410583) | 4,800  | 15,053  | 1,033  |
-|  [Faces in the Wild](https://proceedings.neurips.cc/paper/2004/file/03fa2f7502f5f6b9169e67d17cbf51bb-Paper.pdf) | 13,391  |  14,200 |  21,783 |
-|  **Total** | **50,365**  |  **94,854** |  **58,210** |
-
-## Dataset Preparation
-The annotations are present in TXT format (used by default in the Yolo library), and could be converted to XML (For PASCAL VOC compatibility) by using the **convert_txt_to_xml.py** script. To run the code, first it's necessary to change the dataset path in the beginning of the script and the label map with the classes annotations. After that, just run the following command:
-```
-python3 utils/convert_txt_to_xml.py
-```
-
-> This code was got from [this](https://github.com/MuhammadAsadJaved/Important-shells) open-source repo.
-
-**Note:** the dataset collection is originally structured in multiple folders. To easily convert the annotations, I first used the script entitled **move_files.py** to centralize all the images and annotations, this could also be useful for you!
-
-After that, it's also necessary to convert the XML annotations and the images into TFRecords. To do so, first, we need to split the data in the train and test folders. It can be done by running the following code:
-```
-python3 utils/dataset_split.py
-```
-The default division proportion is 80/20, respectively. To finish the dataset preparation, it's necessary to transform the XML annotations into CSV and then in TFRecords. To convert the annotations to CSV, run the following command:
-```
-python3 utils/xml_to_csv.py -i /xml-input-path -o /csv-output-path
-```
-Finally, it's necessary to convert the CSV files into TFRecord format to train the object detector using the TF Data API. To do so, just run the following code:
-```
-python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=/path-to-label_map.pbtxt --n_splits n_files_to_generate 
-```
+Although this object detection model and dataset could be used for other problems, the main application was done for sign language. That's why the dataset used to train those models were based on people executing signs. 
 
 ## Sign Language Hand and Face Dataset
 Our large-scale hand and face dataset for sign language was based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 different people performing signs, 20 backgrounds, and more than 36,000 videos.
