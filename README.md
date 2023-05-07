@@ -1,23 +1,19 @@
-# Hand and Face Detector for Sign Language
+# Large-Scale Dataset and Benchmarking for Hand and Face Detection Focused on Sign Language
 
-Detecting the hands and the face is an important task for sign language, once those channels have most part of the information used to discriminate signs.
-
-Based on this, this repository contains all the documentation that supports the project of a large-scale object detector for hands and faces. Besides the source code, you will find the pretrained models, datasets, and other useful resources for this context.
-
-Although this object detection model and dataset could be used for other problems, the main application was done for sign language. That's why the dataset used to train those models were based on people executing signs. 
+Detecting the hands and the face is an important task for sign language, once these channels have most part of the information used to classify the signs. This repository includes the source code, pretrained models, and the large-scale hand and face dataset for object detection. Although the models and dataset can be used for other problems, they are specially designed for sign language.
 
 ## Sign Language Hand and Face Dataset
-Our large-scale hand and face dataset for sign language was based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 different people performing signs, 20 backgrounds, and more than 36,000 videos.
-
-To create the dataset annotations, we first trained a hand and face detector model using the dataset described above. After that, we used an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the bounding boxes in XML format. Finally, we manually revised all the images and the respective boxes to fix the mistakes made by the model. The generated dataset has the following statistics:
+The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed the initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually revised all the images and the respective bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
 
 | Frames  | Hands  | Faces  |
 |---|---|---|
 | 477,480  |  954,960 | 477,480
 
-**NOTE:** We tried to detect 16 frames by video, but in some cases the model was not able to detect the desired objects.
+**NOTE:** We tried to detect a maximum of 16 frames per video using a confidence threshold of 35%, but in some cases the model was not able to detect the desired objects.
 
-![Image](/assets/hand_face_example.png "Annotated dataset")
+|![Image](/assets/hand_face_example.png "Annotated dataset")|
+|:--:|
+|*Samples of the annotated dataset*|
 
 ### Dataset split
 The dataset was splitted into train, test and validation, in a proportion of 80/10/10, respectively. To split the data, the first step is to create a folder named **train**, **test** and **validation**, and then move the images and annotations into these folders. To simplify the process, we used the **dataset_split_autsl.py** script, running the following command:
