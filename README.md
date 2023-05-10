@@ -3,20 +3,17 @@
 Detecting the hands and the face is an important task for sign language, once these channels have most part of the information used to classify the signs. This repository includes the source code, pretrained models, and the large-scale hand and face dataset for object detection. Although the models and dataset can be used for other problems, they are specially designed for sign language.
 
 ## Sign Language Hand and Face Dataset
-The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed the initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually revised all the images and the respective bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
+The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed this initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually reviwed all the images and the bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
 
 | Frames  | Hands  | Faces  |
 |---|---|---|
 | 477,480  |  954,960 | 477,480
 
-**NOTE:** We tried to detect a maximum of 16 frames per video using a confidence threshold of 35%, but in some cases the model was not able to detect the desired objects.
+**NOTE:** We tried to detect a maximum of 16 frames per video using a confidence threshold of 35%, but in some cases the model was not able to detect the desired objects. The Figure below shows some samples of the dataset.
 
-|![Image](/assets/hand_face_example.png "Annotated dataset")|
-|:--:|
-|*Samples of the annotated dataset*|
-
+![Image](/assets/hand_face_example.png "Annotated dataset")
 ### Dataset split
-The dataset was splitted into train, test and validation, in a proportion of 80/10/10, respectively. To split the data, the first step is to create a folder named **train**, **test** and **validation**, and then move the images and annotations into these folders. To simplify the process, we used the **dataset_split_autsl.py** script, running the following command:
+The dataset was split into train, test, and validation, in a proportion of 80/10/10, respectively. To split the data, the first step is to create a folder named **train**, **test** and **validation**, and then move the images and annotations into these folders. To simplify the process, we used the **dataset_split_autsl.py** script, running the following command:
 ```
 python3 dataset_split_autsl.py
 ``` 
@@ -45,6 +42,21 @@ After that, you can visualize the yolo bounding boxes in the images by running t
 python3 utils/show_yolo_img.py
 ```
 > Both scripts were obtained from [this](https://towardsdatascience.com/convert-pascal-voc-xml-to-yolo-for-object-detection-f969811ccba5) tutorial.
+
+## Object Detection Results
+We trained and optimized different object detection architectures for the given task of hand and face detection for sign language, achieving good results while reducing the models' complexity. The Table bellow shows the mean Average Precision (mAP) and inference time (milliseconds) of each detector, where the values in parentheses correspond to the inference time before applying any optimizations.
+
+**Note:** CPU Intel Core I5 10400, GPU Nvidia RTX 3060.
+
+| Architecture  | Inf. time CPU  | Inf. time GPU  | mAP@50 | mAP@75 |
+|---|---|---|---|---|
+| SSD640  |  53.2 (108.0) | 11.6 (44.1) | 98.5 | 95.0
+| SSD320  |  **15.7** (32.7) | 9.9 (25.7) | 92.1 | 73.1
+| EfficientDet D0  |  67.8 (124.5) | 16.1 (53.4) | 96.7 | 85.8
+| YoloV7  |  123.9 (211.1) | **7.4** (7.6) | 98.6 | 95.7
+| Faster R-CNN  |  281.0 (811.5) | 26.3 (79.1) | **99.0** | 96.2
+| CenterNet  |  40.0 | 7.9 | **99.0** | **96.7**
+
 
 ## **Training the Model**
 To train the object detector, the first step is to execute the model setup, by running the following script:
