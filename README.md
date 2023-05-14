@@ -57,6 +57,7 @@ We trained and optimized different object detection architectures for the given 
 | Faster R-CNN  |  281.0 (811.5) | 26.3 (79.1) | **99.0** | 96.2
 | CenterNet  |  40.0 | 7.9 | **99.0** | **96.7**
 
+The models were trained using the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/official#object-detection-and-segmentation) and the configuration file of each architecture can be found at **src/utils/pipelines**, making it easy to reproduce the results. 
 
 ## **Training the Model**
 To train the object detector, the first step is to execute the model setup, by running the following script:

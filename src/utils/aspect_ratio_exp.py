@@ -1,3 +1,7 @@
+"""
+This script is used for generating the best aspect ratios for the anchor boxes of object detectors.
+"""
+
 import sys
 import os
 import numpy as np
