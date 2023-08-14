@@ -1,6 +1,6 @@
 # Large-Scale Dataset and Benchmarking for Hand and Face Detection Focused on Sign Language
 
-Detecting the hands and the face is an important task for sign language, once these channels have most part of the information used to classify the signs. This repository includes the source code, pretrained models, and the large-scale hand and face dataset for object detection. Although the models and dataset can be used for other problems, they are specially designed for sign language.
+Detecting the hands and the face is an important task for sign language, once these channels have most part of the information used to classify the signs. This repository includes the source code, pretrained models, and the large-scale hand and face dataset for object detection. Although the models and dataset can be used for other problems, they are specially designed for sign language. The paper describing the dataset and the models were accepted on [ESANN](https://www.esann.org/) (European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning) and will be available soon.
 
 ## Sign Language Hand and Face Dataset
 The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed this initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually reviwed all the images and the bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
@@ -15,9 +15,11 @@ The large-scale hand and face dataset for sign language is based on the [AUTSL](
 ### Dataset split
 The dataset was split following the [Chalearn](https://chalearnlap.cvc.uab.cat/dataset/40/description/) competition guidelines. That said, we used 31 interpreters for training, 6 for validation, and 6 for testing, ensuring that the same interpreter did not appear in multiple splits. The number of images per split was 369,053 for training, 49,041 for test, and 59,386 for validation.
 
+### Downloading the dataset and pretrained models
+You can download the dataset and pretrained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). The folder "saved_models.zip" contains each of the trained models in this research. The folder "hand_face_detection_dataset", on the other hand, contains all the images and labels, separeted in train, test, and validation folders. The folder named images contains all the images and the labels in PASCAL VOC format. The "labels" folder, in contrast, contains the labels in "**.txt**" format for yolo.
 
 ### TFRecord creation
-To train the models using TensorFlow, we first need to convert the images and XML annotations into TFRecord format. To do so, we first need to create a csv file that maps the images with the respective annotations using the command bellow:
+To train the models using TensorFlow, we first need to convert the images and XML annotations into TFRecord format. To do so, its necessary to create a csv file that maps the images with the respective annotations using the command bellow:
 
 ```
 python3 utils/xml_to_csv.py -i /xml-input-path -o /csv-output-path
@@ -42,7 +44,7 @@ To train the Yolo model, it's necessary to convert the XML annotations to TXT fo
 python3 utils/xml2yolo.py
 ```
 **NOTE:** Before running the script, make sure to change the labels, images and output paths in the beginning of the script.
-**NOTE 2:** We already provide the Yolo annotations in the dataset folder, so you don't need to run the script.
+**NOTE 2:** We already provided the Yolo annotations in the dataset folder, so you don't need to run the script.
 
 After that, you can visualize the yolo bounding boxes in the images by running the following command:
 ```
