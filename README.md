@@ -54,19 +54,6 @@ The command parameters are the following:
 
 For our dataset, it is advised to generate a total of 15 TFRecord files for both the test and validation sets, while the training set requires 110 files. Each of these individual files is approximately 200 MB in size.
 
-### Yolo annotations
-To train the Yolo model, it's necessary to convert the XML annotations to TXT format. We done this by running the following command:
-```
-python3 utils/xml2yolo.py
-```
-**NOTE:** We already provided the Yolo annotations in the dataset folder, so you don't need to run the script again.
-
-After that, you can visualize the yolo bounding boxes in the images by running the following command:
-```
-python3 utils/show_yolo_img.py
-```
-> Both scripts were obtained from [this](https://towardsdatascience.com/convert-pascal-voc-xml-to-yolo-for-object-detection-f969811ccba5) tutorial.
-
 ## Object Detection Results
 We trained and optimized different object detection architectures for the given task of hand and face detection for sign language, achieving good results while reducing the models' complexity. The Table bellow shows the mean Average Precision (mAP) and inference time (milliseconds) of each detector, where the values in parentheses correspond to the inference time before applying any optimizations.
 
