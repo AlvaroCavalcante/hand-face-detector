@@ -1,6 +1,6 @@
 # Large-Scale Dataset and Benchmarking for Hand and Face Detection Focused on Sign Language
 
-Detecting the hands and the face is an important task for sign language, as these channels contain the majority of the information necessary for classifying signs. This repository includes the source code, pre-trained models, and the dataset developed in our paper, accepted on [ESANN](https://www.esann.org/) (European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning). Although the models and dataset can be used for other problems, they are specifically designed for the domain of sign language, contributing to further research in this field.
+Detecting the hands and the face is an important task for sign language, as these channels contain the majority of the information necessary for classifying signs. This repository includes the source code, pre-trained models, and the dataset developed in our paper (available soon), accepted on [ESANN](https://www.esann.org/) (European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning). Although the models and dataset can be used for other problems, they are specifically designed for the domain of sign language, contributing to further research in this field.
 
 ## Sign Language Hand and Face Dataset
 The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed this initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually reviwed all the images and the bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
@@ -15,7 +15,7 @@ The large-scale hand and face dataset for sign language is based on the [AUTSL](
 ### Dataset split
 The dataset was split according to the [Chalearn](https://chalearnlap.cvc.uab.cat/dataset/40/description/) competition guidelines. That said, we employed 31 interpreters for training, 6 for validation, and 6 for testing, ensuring that the same interpreter did not appear in multiple splits. The distribution of images per split amounted to 369,053 for training, 49,041 for test, and 59,386 for validation.
 
-### Downloading the dataset and pre-trained models
+## Downloading the dataset and pre-trained models
 You can download the dataset and pre-trained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). The folder "**saved_models.zip**" contains each of the models trained in this research. As the name suggests, the models are saved in the [SavedModel](https://www.tensorflow.org/guide/saved_model) format.
 
 The folder "**hand_face_detection_dataset.zip**", on the other hand, contains all the images and labels, totaling around 26 GB of data. The folder structure is as follows:
@@ -55,7 +55,7 @@ The command parameters are the following:
 For our dataset, it is advised to generate a total of 15 TFRecord files for both the test and validation sets, while the training set requires 110 files. Each of these individual files is approximately 200 MB in size.
 
 ## Object Detection Results
-We trained and optimized different object detection architectures for the given task of hand and face detection for sign language, achieving good results while reducing the models' complexity. The Table bellow shows the mean Average Precision (mAP) and inference time (milliseconds) of each detector, where the values in parentheses correspond to the inference time before applying any optimizations.
+We trained and optimized different object detection architectures for the given task of hand and face detection for sign language, achieving good results while reducing the models' complexity. The Table bellow shows the mean Average Precision (mAP) and inference time (milliseconds) of each detector. The values in parentheses correspond to the inference time before applying the optimizations.
 
 **Note:** CPU Intel Core I5 10400, GPU Nvidia RTX 3060.
 
@@ -68,7 +68,21 @@ We trained and optimized different object detection architectures for the given 
 | Faster R-CNN  |  281.0 (811.5) | 26.3 (79.1) | **99.0** | 96.2
 | CenterNet  |  40.0 | 7.9 | **99.0** | **96.7**
 
-The models were trained using the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/official#object-detection-and-segmentation) and the configuration file of each architecture can be found at **src/utils/pipelines**, making it easy to reproduce the results. 
+As observed, the fastest models achieved over 135 frames per second (FPS) on GPU (YoloV7) and 63 FPS on CPU (SSD320), reaching a real-time performance for the task of hand and face detection.
+
+The models were trained using the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/official#object-detection-and-segmentation) and the configuration files of each architecture can be found at **src/utils/pipelines**, making it easy to reproduce the results. To understand in detail how optimizations were made, refer to the original paper (available soon).
+
+## Testing Models
+To test the models you just need to run the **hand_face_detection.py** script, using the following arguments:
+
+- **saved_model_path**: Path of the saved_model folder.
+- **source_path**: Path of the video file to test the model. The default behavior is to use the webcam stream.
+- **label_map_path**: Path of the label map file (defaults to src/utils/label_map.pbtxt).
+- **show_results**: Either to show or not the detection results.
+- **img_res**: Image resolution. Defaults to 512x512.
+- **device**: Device to run the model. Defaults to CPU.
+
+There is a benchmarking video inside utils/test_videos folder that can be used to test the models.
 
 ## **Training the Model**
 To train the object detector, the first step is to execute the model setup, by running the following script:
@@ -115,15 +129,3 @@ python models/research/object_detection/exporter_main_v2.py \
     --trained_checkpoint_dir {model_dir} \
     --output_directory {output_path}
 ```
-
-## Testing Model Results
-To verify the model working, we need to run the **hand_face_detection.py** script, with the following arguments:
-
-- **saved_model_path**: Path of the saved_model
-- **source_path**: Path of the video file to test the model. The default behavior is to use the webcam stream.
-- **label_map_path**: Path of the label map used by the model.
-- **compute_features**: If True, the trigronometrical features are calculated. 
-- **use_docker**: Removes result visualization when running inside docker container.
-- **single_person**: Define a limit of hands and face to detect considering one single person.
-
-The **asl_bench.mp4** video, inside utils/test_videos folder is used as a commom benchmarking for the trained models, where the goal is to verify the mean FPS.
