@@ -1,3 +1,8 @@
+"""
+This script was obtained from this tutorial: https://towardsdatascience.com/convert-pascal-voc-xml-to-yolo-for-object-detection-f969811ccba5.
+It was used to plot the yolo annotations (.txt files) into the image in order to verify if the label were correctly generated.
+"""
+
 from PIL import Image, ImageDraw
 
 

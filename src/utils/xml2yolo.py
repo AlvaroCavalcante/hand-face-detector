@@ -1,3 +1,8 @@
+"""
+This script was obtained from this tutorial: https://towardsdatascience.com/convert-pascal-voc-xml-to-yolo-for-object-detection-f969811ccba5.
+It was used to convert the XML annotations to YOLO format, generating the TXT files.
+"""
+
 import xml.etree.ElementTree as ET
 import glob
 import os
