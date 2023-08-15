@@ -285,9 +285,9 @@ def main(args):
             frame, output_img, args.label_map_path, detect_fn, heigth, width)
         inference_speed.append(time.time() - start)
 
-        if args.compute_features:
-            output_img, triangle_features = compute_features_and_draw_lines(
-                bouding_boxes, output_img)
+        # if args.compute_features:
+        #     output_img, triangle_features = compute_features_and_draw_lines(
+        #         bouding_boxes, output_img)
 
         if (time.time() - start_time) > 1:
             mean_inf_speed_ms = 1E3 * np.mean(inference_speed)
@@ -296,7 +296,7 @@ def main(args):
                 round(1000 / mean_inf_speed_ms, 2)))
             start_time = time.time()
 
-        if not args.use_docker:
+        if args.show_results:
             cv2.imshow('Frame', cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
             # cv2.imwrite(file, cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
             key = cv2.waitKey(1) & 0xFF
@@ -307,14 +307,12 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--saved_model_path', type=str,
-                        default='./utils/saved_models/centernet_mobilenet_v2_fpn/saved_model/')
-    parser.add_argument('--source_path', type=str,
-                        default='utils/test_videos/asl_bench.mp4')
+    parser.add_argument('--saved_model_path', type=str, required=True)
+    parser.add_argument('--source_path', type=str, default=None)
     parser.add_argument('--label_map_path', type=str,
                         default='./utils/label_map.pbtxt')
-    parser.add_argument('--compute_features', type=bool, default=True)
-    parser.add_argument('--use_docker', type=bool, default=False)
+    # parser.add_argument('--compute_features', type=bool, default=True)
+    parser.add_argument('--show_results', type=bool, default=True)
     parser.add_argument('--img_res', type=str, default='512')
     parser.add_argument('--device', type=str, default='cpu')
     args = parser.parse_args()
