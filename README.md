@@ -1,6 +1,6 @@
 # Large-Scale Dataset and Benchmarking for Hand and Face Detection Focused on Sign Language
 
-Detecting the hands and the face is an important task for sign language, once these channels have most part of the information used to classify the signs. This repository includes the source code, pretrained models, and the large-scale hand and face dataset for object detection. Although the models and dataset can be used for other problems, they are specially designed for sign language. The paper describing the dataset and the models were accepted on [ESANN](https://www.esann.org/) (European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning) and will be available soon.
+Detecting the hands and the face is an important task for sign language, as these channels contain the majority of the information necessary for classifying signs. This repository includes the source code, pre-trained models, and the dataset developed in our paper, accepted on [ESANN](https://www.esann.org/) (European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning). Although the models and dataset can be used for other problems, they are specifically designed for the domain of sign language, contributing to further research in this field.
 
 ## Sign Language Hand and Face Dataset
 The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed this initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually reviwed all the images and the bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
@@ -9,42 +9,57 @@ The large-scale hand and face dataset for sign language is based on the [AUTSL](
 |---|---|---|
 | 477,480  |  954,960 | 477,480
 
-**NOTE:** We tried to detect a maximum of 16 frames per video using a confidence threshold of 35%, but in some cases the model was not able to detect the desired objects. The Figure below shows some samples of the dataset.
+**NOTE:** We detected a maximum of 16 frames per video using a confidence threshold of 35%. The Figure below shows some samples of the dataset.
 
 ![Image](/assets/hand_face_example.png "Annotated dataset")
 ### Dataset split
-The dataset was split following the [Chalearn](https://chalearnlap.cvc.uab.cat/dataset/40/description/) competition guidelines. That said, we used 31 interpreters for training, 6 for validation, and 6 for testing, ensuring that the same interpreter did not appear in multiple splits. The number of images per split was 369,053 for training, 49,041 for test, and 59,386 for validation.
+The dataset was split according to the [Chalearn](https://chalearnlap.cvc.uab.cat/dataset/40/description/) competition guidelines. That said, we employed 31 interpreters for training, 6 for validation, and 6 for testing, ensuring that the same interpreter did not appear in multiple splits. The distribution of images per split amounted to 369,053 for training, 49,041 for test, and 59,386 for validation.
 
-### Downloading the dataset and pretrained models
-You can download the dataset and pretrained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). The folder "saved_models.zip" contains each of the trained models in this research. The folder "hand_face_detection_dataset", on the other hand, contains all the images and labels, separeted in train, test, and validation folders. The folder named images contains all the images and the labels in PASCAL VOC format. The "labels" folder, in contrast, contains the labels in "**.txt**" format for yolo.
+### Downloading the dataset and pre-trained models
+You can download the dataset and pre-trained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). The folder "**saved_models.zip**" contains each of the models trained in this research. As the name suggests, the models are saved in the [SavedModel](https://www.tensorflow.org/guide/saved_model) format.
+
+The folder "**hand_face_detection_dataset.zip**", on the other hand, contains all the images and labels, totaling around 26 GB of data. The folder structure is as follows:
+
+├── labels
+│   ├── validation
+│   │   ├── *labels.txt*
+│   ├── train
+│   ├── test
+├── images
+│   ├── validation
+│   │   ├── *images.jpg*
+│   │   ├── *labels.xml*
+│   ├── train
+│   ├── test
+
+The folder named "images" contains all the images and the labels in PASCAL VOC (xml) format. The "labels" folder, in contrast, contains the labels in ".txt" format for YOLO.
 
 ### TFRecord creation
-To train the models using TensorFlow, we first need to convert the images and XML annotations into TFRecord format. To do so, its necessary to create a csv file that maps the images with the respective annotations using the command bellow:
+In order to train the models using TensorFlow, the initial step involves converting the images and XML annotations into the TFRecord format. This conversion process mandates the creation of a CSV file that establishes the correlation between the images and their corresponding annotations. This can be achieved using the following command:
 
 ```
 python3 utils/xml_to_csv.py -i /xml-input-path -o /csv-output-path
 ```
-The "xml-input-path" is the path to the folder containing the XML files with the annotations, and the "csv-output-path" is the path to the output CSV file. After that, we can create the TFRecord files by running the following command:
+Where "xml-input-path" represents the path to the folder containing the XML files, and "csv-output-path" designates the location for the resulting CSV file. After that, the TFRecord files can be generated through the execution of the subsequent command:
 
 ```
-python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=/path-to-label_map.pbtxt --n_splits n_files_to_generate 
+python3 utils/generate_tfrecord.py --csv_input=/path-to-csv --output_path ./output.record --img_path=/path-to-images --label_map=src/utils/label_map.pbtxt --n_splits n_files_to_generate 
 ```
 The command parameters are the following:
 - csv_input: The path of the csv file generated by the previous script.
-- output_path: The path to the output TFRecord files.
+- output_path: The output path of the TFRecord files.
 - img_path: The path to the folder containing the images.
-- label_map: The path to the label_map.pbtxt file.
+- label_map: The path to the label_map.pbtxt file (available in src/utils).
 - n_splits: The number of TFRecord files to generate.
 
-In this case, we recommend the creation of 15 TFRecord files for test and validation sets, and 110 files for training. Every file has around 200 MB.
+For our dataset, it is advised to generate a total of 15 TFRecord files for both the test and validation sets, while the training set requires 110 files. Each of these individual files is approximately 200 MB in size.
 
 ### Yolo annotations
-To train the Yolo model, it's necessary to convert the XML annotations to TXT format. We can do this by running the following command:
+To train the Yolo model, it's necessary to convert the XML annotations to TXT format. We done this by running the following command:
 ```
 python3 utils/xml2yolo.py
 ```
-**NOTE:** Before running the script, make sure to change the labels, images and output paths in the beginning of the script.
-**NOTE 2:** We already provided the Yolo annotations in the dataset folder, so you don't need to run the script.
+**NOTE:** We already provided the Yolo annotations in the dataset folder, so you don't need to run the script again.
 
 After that, you can visualize the yolo bounding boxes in the images by running the following command:
 ```
