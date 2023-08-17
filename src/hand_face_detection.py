@@ -261,7 +261,7 @@ def main(args):
     detect_fn = tf.saved_model.load(args.saved_model_path)
     print('Model loaded')
 
-    source = args.source_path if args.source_path else 1
+    source = args.source_path if args.source_path else 0
     cap = cv2.VideoCapture(source)
 
     inference_speed = []
@@ -298,7 +298,6 @@ def main(args):
 
         if args.show_results:
             cv2.imshow('Frame', cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
-            # cv2.imwrite(file, cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB))
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
                 break
@@ -310,7 +309,7 @@ if __name__ == '__main__':
     parser.add_argument('--saved_model_path', type=str, required=True)
     parser.add_argument('--source_path', type=str, default=None)
     parser.add_argument('--label_map_path', type=str,
-                        default='./utils/label_map.pbtxt')
+                        default='src/utils/label_map.pbtxt')
     # parser.add_argument('--compute_features', type=bool, default=True)
     parser.add_argument('--show_results', type=bool, default=True)
     parser.add_argument('--img_res', type=str, default='512')
