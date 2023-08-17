@@ -72,17 +72,28 @@ As observed, the fastest models achieved over 135 frames per second (FPS) on GPU
 
 The models were trained using the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/official#object-detection-and-segmentation) and the configuration files of each architecture can be found at **src/utils/pipelines**, making it easy to reproduce the results. To understand in detail how optimizations were made, refer to the original paper (available soon).
 
-## Testing Models
-To test the models you just need to run the **hand_face_detection.py** script, using the following arguments:
+## Project setup
+The project was developed using Python 3.8, but it's probably compatible with newer versions. It's recommeded to use a [virtual environment](https://docs.python.org/pt-br/3/library/venv.html) to complete the setup in your machine. After creating the venv, you can install the dependencies using the following command:
+```
+pip install -r requirements.txt
+```
+If you want to retrain the models, you'll also need to install the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection). There's some great tutorials on how to do that, like [this one](https://neptune.ai/blog/how-to-train-your-own-object-detector-using-tensorflow-object-detection-api). Finally, if you have a GPU available, follow this instructions to setup [TensorFlow on GPU](https://www.tensorflow.org/install/pip#windows-native_1). 
 
-- **saved_model_path**: Path of the saved_model folder.
-- **source_path**: Path of the video file to test the model. The default behavior is to use the webcam stream.
+
+## Testing the models
+You can use the **hand_face_detection.py** script to find the model that better works for you. To run the code, use the following arguments:
+
+- **saved_model_path**: Path of the saved_model folder that contains the *saved_model.pb* file.
+- **source_path**: Path of the video file to test the model. The default behavior is to use the webcam stream. There is a benchmarking video inside *utils/test_videos* folder that can be used to test the models.
 - **label_map_path**: Path of the label map file (defaults to src/utils/label_map.pbtxt).
-- **show_results**: Either to show or not the detection results.
+- **show_results**: Either to show or not the detection results. Defaults to True.
 - **img_res**: Image resolution. Defaults to 512x512.
-- **device**: Device to run the model. Defaults to CPU.
+- **device**: Device to run the model. Defaults to cpu.
 
-There is a benchmarking video inside utils/test_videos folder that can be used to test the models.
+Here is an example of how to run the code:
+````
+ python src/hand_face_detection.py --saved_model_path C:\Users\saved_models\centernet_mobilenet_v2_fpn\saved_model --device gpu --img_res 640
+````
 
 ## **Training the Model**
 To train the object detector, the first step is to execute the model setup, by running the following script:
