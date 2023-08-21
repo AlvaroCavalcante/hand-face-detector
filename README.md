@@ -20,6 +20,7 @@ You can download the dataset and pre-trained models in this [link](https://drive
 
 The folder "**hand_face_detection_dataset.zip**", on the other hand, contains all the images and labels, totaling around 26 GB of data. The folder structure is as follows:
 
+```
 ├── labels
 │   ├── validation
 │   │   ├── *labels.txt*
@@ -31,7 +32,7 @@ The folder "**hand_face_detection_dataset.zip**", on the other hand, contains al
 │   │   ├── *labels.xml*
 │   ├── train
 │   ├── test
-
+```
 The folder named "images" contains all the images and the labels in PASCAL VOC (xml) format. The "labels" folder, in contrast, contains the labels in ".txt" format for YOLO.
 
 ### TFRecord creation
