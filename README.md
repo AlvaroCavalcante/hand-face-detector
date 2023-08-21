@@ -81,7 +81,7 @@ pip install -r requirements.txt
 If you want to retrain the models, you'll also need to install the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection). There's some great tutorials on how to do that, like [this one](https://neptune.ai/blog/how-to-train-your-own-object-detector-using-tensorflow-object-detection-api). Finally, if you have a GPU available, follow this instructions to setup [TensorFlow on GPU](https://www.tensorflow.org/install/pip#windows-native_1). 
 
 
-## Testing the models
+## Using the trained models
 You can use the **hand_face_detection.py** script to find the model that better works for you. To run the code, use the following arguments:
 
 - **saved_model_path**: Path of the saved_model folder that contains the *saved_model.pb* file.
@@ -96,16 +96,9 @@ Here is an example of how to run the code:
  python src/hand_face_detection.py --saved_model_path C:\Users\saved_models\centernet_mobilenet_v2_fpn\saved_model --device gpu --img_res 640
 ````
 
-## **Training the Model**
-To train the object detector, the first step is to execute the model setup, by running the following script:
+## **Train, test and export new models**
+As mentioned above, the training, evaluation, and export of the object detection models were made using TF object detection API. After cloning the repository and installing the dependencies, the training can be done with the following command:
 
-```
-python3 hand_face_detector_setup.py --label_map_path /label_map.pbtxt --batch_size 50 --model_name "Your model name" --download_url http://tf-url.com
-```
-
-Where the model name and download url is taken from [TF Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md). The setup script basically configures the pipeline file to prepare the model to be trained.
-
-After the model setup, you just need to run the following code to start the detector training:
 ```
 python models/research/object_detection/model_main_tf2.py \
     --pipeline_config_path={pipeline_fname} \
@@ -115,10 +108,13 @@ python models/research/object_detection/model_main_tf2.py \
     --checkpoint_every_n=1000 \
     --num_eval_steps={num_eval_steps}
 ```
-The model training was conducted on Google Colab. The notebook can be found [here](https://colab.research.google.com/drive/1209hYjuj449H-H_jfXLMdvnSgHYWgsq0?usp=sharing).
+Where the main arguments are:
 
-## **Evaluating model performance**
-To evaluate the model performance during the training step, you just need to run the following command:
+- **pipeline_config_path**: Path of the pipeline file (.config). Use one of the pipeline files inside src/utils/pipelines to have similar results than reported in this research.
+- **model_dir**: Path of the folder to save the model checkpoint.
+- **num_train_steps & num_eval_steps**: Number of steps to train and evaluate the model. Each step represents a batch of data.
+
+To evaluate the model performance during the training (or after, if you prefer), you just need to run the following command:
 
 ```
 python models/research/object_detection/model_main_tf2.py \
@@ -131,8 +127,7 @@ python models/research/object_detection/model_main_tf2.py \
 
 When specifying the **checkpoint_dir** parameter, the last checkpoint will be used to evaluate the model performance on eval data.
 
-## Exporting trained model
-After training a great model, you probably would like to export it into the savedModel format to use it in the inference code. To do so, just run the following command:
+Finally, after training your object detector, you would probably like to export it to **savedModel** format for use in the inference code. To do so, just run the following command:
 
 ```
 python models/research/object_detection/exporter_main_v2.py \
@@ -141,3 +136,5 @@ python models/research/object_detection/exporter_main_v2.py \
     --trained_checkpoint_dir {model_dir} \
     --output_directory {output_path}
 ```
+## Doubts and contribution
+If you have any doubt or trouble when using this project, open a new issue on this GitHub repository, or send an e-mail to alvaroleandro250@gmail.com. Also, contributions are always welcome, feel free to open an pull request or give any suggestion on how to improve this project.
