@@ -95,6 +95,13 @@ Here is an example of how to run the code:
 ````
  python src/hand_face_detection.py --saved_model_path C:\Users\saved_models\centernet_mobilenet_v2_fpn\saved_model --device gpu --img_res 640
 ````
+If everything worked fine, you'll see your detections:
+
+<p align="center">
+    <img src="assets/libras_gif.gif" width="480" height=840>
+    <br>
+    <sup>Sign language interpreter <a href="https://www.linkedin.com/in/esther-sato-ramos-cavalcante-a6b125254/" target="_blank">Esther Sato</a> testing hand and face detection.</sup>
+</p>
 
 ## **Train, test and export new models**
 As mentioned above, the training, evaluation, and export of the object detection models were made using TF object detection API. After cloning the repository and installing the dependencies, the training can be done with the following command:
