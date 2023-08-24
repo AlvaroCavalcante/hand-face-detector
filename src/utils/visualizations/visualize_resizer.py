@@ -1,3 +1,6 @@
+"""
+This script was used to compare the fixed share resizer and the keep aspect ratio resizer for training the object detection models.
+"""
 import glob
 import functools
 import random

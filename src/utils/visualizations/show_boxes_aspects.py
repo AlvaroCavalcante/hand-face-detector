@@ -1,3 +1,7 @@
+"""
+This script was used to visualize bounding boxes of different aspect ratios and compare them.
+"""
+
 import numpy as np
 import cv2
 

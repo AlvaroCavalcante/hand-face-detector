@@ -1,5 +1,7 @@
-# Code got from: https://github.com/majrie/visualize_augmentation
-# All augmentations options: https://github.com/tensorflow/models/blob/master/research/object_detection/protos/preprocessor.proto
+"""
+This code was obtained from https://github.com/majrie/visualize_augmentation, and its used to visualize all the data augmentation options available in the object detection pipelines, comparing them to find the best. 
+All augmentations options: https://github.com/tensorflow/models/blob/master/research/object_detection/protos/preprocessor.proto
+""" 
 
 
 import functools

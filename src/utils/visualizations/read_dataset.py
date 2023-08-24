@@ -1,3 +1,6 @@
+"""
+This script was used to read the autonomy dataset (stored in TF Record format) and save the image files.
+"""
 import os
 from itertools import combinations
 

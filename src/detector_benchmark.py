@@ -1,3 +1,7 @@
+"""
+Script used to iterate over a dataset to test the inference time of the object detection model in different videos.
+"""
+
 import time
 
 import tensorflow as tf
