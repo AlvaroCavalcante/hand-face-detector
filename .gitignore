@@ -1,4 +1,5 @@
 model/*
+*.avi
 utils/saved_models/*
 checkpoint/*
 .vscode/*
