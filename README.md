@@ -1,6 +1,6 @@
 # Large-Scale Dataset and Benchmarking for Hand and Face Detection Focused on Sign Language
 
-Detecting the hands and the face is an important task for sign language, as these channels contain the majority of the information necessary for classifying signs. This repository includes the source code, pre-trained models, and the dataset developed in our paper (available soon), accepted on [ESANN](https://www.esann.org/) (European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning). Although the models and dataset can be used for other problems, they are specifically designed for the domain of sign language, contributing to further research in this field.
+Detecting the hands and the face is an important task for sign language, as these channels contain the majority of the information necessary for classifying signs. This repository includes the source code, pre-trained models, and the dataset developed in our [paper](https://www.esann.org/sites/default/files/proceedings/2023/ES2023-185.pdf), accepted on [ESANN](https://www.esann.org/) (31th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning). Although the models and dataset can be used for other problems, they are specifically designed for the domain of sign language, contributing to further research in this field.
 
 ## Sign Language Hand and Face Dataset
 The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed this initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually reviwed all the images and the bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
@@ -16,9 +16,9 @@ The large-scale hand and face dataset for sign language is based on the [AUTSL](
 The dataset was split according to the [Chalearn](https://chalearnlap.cvc.uab.cat/dataset/40/description/) competition guidelines. That said, we employed 31 interpreters for training, 6 for validation, and 6 for testing, ensuring that the same interpreter did not appear in multiple splits. The distribution of images per split amounted to 369,053 for training, 49,041 for test, and 59,386 for validation.
 
 ## Downloading the dataset and pre-trained models
-You can download the dataset and pre-trained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). The folder "**saved_models.zip**" contains each of the models trained in this research. As the name suggests, the models were saved using the [SavedModel](https://www.tensorflow.org/guide/saved_model) format.
+You can download the dataset and pre-trained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). It's just necessary to ask for permission using a Google account, and I will share the dataset with you as soon as possible.
 
-The folder "**hand_face_detection_dataset.zip**", on the other hand, contains all the images and labels, totaling around 26 GB of data. The folder structure is as follows:
+The folder "**saved_models.zip**" contains each of the models trained in this research. As the name suggests, the models were saved using the [SavedModel](https://www.tensorflow.org/guide/saved_model) format. The folder "**hand_face_detection_dataset.zip**", on the other hand, contains all the images and labels, totaling around 26 GB of data. The folder structure is as follows:
 
 ```
 ├── labels
@@ -102,6 +102,8 @@ If everything worked fine, you'll see your detections:
     <br>
     <sup>Sign language interpreter <a href="https://www.linkedin.com/in/esther-sato-ramos-cavalcante-a6b125254/" target="_blank">Esther Sato</a> testing hand and face detection.</sup>
 </p>
+
+After the model inference, a file called "output.avi" is produced with the detection results.
 
 ## **Train, test and export new models**
 As mentioned above, the training, evaluation, and export of the object detection models were made using TF object detection API. After cloning the repository and installing the dependencies, the training can be done with the following command:
