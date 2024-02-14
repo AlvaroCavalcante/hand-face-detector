@@ -1,0 +1,57 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: hand-face-detector
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: ÁLVARO LEANDRO
+    family-names: CAVALCANTE CARNEIRO
+    email: leandro0807@live.com
+    affiliation: São Paulo State University
+    orcid: 'https://orcid.org/0000-0002-9485-7229'
+identifiers:
+  - type: url
+    value: >-
+      https://www.esann.org/sites/default/files/proceedings/2023/ES2023-185.pdf
+    description: Paper
+repository-code: 'https://github.com/AlvaroCavalcante/hand-face-detector'
+abstract: >-
+  Object detection is an important preprocessing technique
+  for
+
+  sign language recognition, allowing focus on the most
+  important parts of
+
+  the image. This paper introduces a new large-scale dataset
+  for hand and
+
+  face detection in sign language context, mitigating the
+  lack of data for this
+
+  problem. We evaluated different object detection
+  architectures to find the
+
+  best trade-off between computational cost and mean Average
+  Precision
+
+  (mAP). The proposed dataset contains 477,480 annotated
+  images. The
+
+  most accurate detector (CenterNet) achieved an mAP of
+  96.7%. Furthermore, the optimizations made to the models
+  reduced the inference time
+
+  up to 74% in the best scenario
+keywords:
+  - deep-learning
+  - tensorflow
+  - sign-language
+  - face-detection
+  - object-detection
+  - datasets
+  - hand-detection
+  - sign-language-recognition
