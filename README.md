@@ -4,7 +4,7 @@ Detecting the hands and the face is an important task for sign language, as thes
 
 ## Sign Language Hand and Face Dataset
 
-The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed this initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually reviwed all the images and the bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
+The large-scale hand and face dataset for sign language is based on the [AUTSL](https://chalearnlap.cvc.uab.cat/dataset/40/description/) dataset, which contains 43 interpreters, 20 backgrounds, and more than 36,000 videos. To create the annotations, we trained an initial detector using the [Autonomy](https://autonomy.cs.sfu.ca/hands_and_faces/) data. After that, we employed this initial model and an [auto-annotation tool](https://github.com/AlvaroCavalcante/auto_annotate) to generate the annotations following the PASCAL VOC format. Finally, we manually reviewed all the images and the bounding boxes to fix the mistakes made by the model and better fit the objects. The generated dataset has the following statistics:
 
 | Frames  | Hands  | Faces  |
 |---|---|---|
@@ -16,11 +16,11 @@ The large-scale hand and face dataset for sign language is based on the [AUTSL](
 
 ### Dataset split
 
-The dataset was split according to the [Chalearn](https://chalearnlap.cvc.uab.cat/dataset/40/description/) competition guidelines. That said, we employed 31 interpreters for training, 6 for validation, and 6 for testing, ensuring that the same interpreter did not appear in multiple splits. The distribution of images per split amounted to 369,053 for training, 49,041 for test, and 59,386 for validation.
+The dataset was split according to the [Chalearn](https://chalearnlap.cvc.uab.cat/dataset/40/description/) competition guidelines. That said, we employed 31 interpreters for training, 6 for validation, and 6 for testing, ensuring that the same interpreter did not appear in multiple splits. The distribution of images per split amounted to 369,053 for training, 49,041 for testing, and 59,386 for validation.
 
 ## Downloading the dataset and pre-trained models
 
-You can download the dataset and pre-trained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). It's just necessary to ask for permission using a Google account, and I will share the dataset with you as soon as possible.
+You can download the dataset and pre-trained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). It's just necessary to ask for permission to use a Google account, and I will share the dataset with you as soon as possible.
 
 The folder "**saved_models.zip**" contains each of the models trained in this research. As the name suggests, the models were saved using the [SavedModel](https://www.tensorflow.org/guide/saved_model) format. The folder "**hand_face_detection_dataset.zip**", on the other hand, contains all the images and labels, totaling around 26 GB of data. The folder structure is as follows:
 
@@ -38,7 +38,7 @@ The folder "**saved_models.zip**" contains each of the models trained in this re
 │   ├── test
 ```
 
-The folder named "images" contains all the images and the labels in PASCAL VOC (xml) format. The "labels" folder, in contrast, contains the labels in ".txt" format for YOLO.
+The folder named "images" contains all the images and the labels in PASCAL VOC (XML) format. The "labels" folder, in contrast, contains the labels in ".txt" format for YOLO.
 
 ### TFRecord creation
 
@@ -85,13 +85,13 @@ The models were trained using the [TensorFlow Object Detection API](https://gith
 
 ## Project setup
 
-The project was developed using Python 3.8, but it's probably compatible with newer versions. It's recommeded to use a [virtual environment](https://docs.python.org/pt-br/3/library/venv.html) to complete the setup in your machine. After creating the venv, you can install the dependencies using the following command:
+The project was developed using Python 3.8, but it's probably compatible with newer versions. It's recommended to use a [virtual environment](https://docs.python.org/pt-br/3/library/venv.html) to complete the setup on your machine. After creating the venv, you can install the dependencies using the following command:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-If you want to retrain the models, you'll also need to install the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection). There's some great tutorials on how to do that, like [this one](https://neptune.ai/blog/how-to-train-your-own-object-detector-using-tensorflow-object-detection-api). Finally, if you have a GPU available, follow this instructions to setup [TensorFlow on GPU](https://www.tensorflow.org/install/pip#windows-native_1).
+If you want to retrain the models, you'll also need to install the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection). There are some great tutorials on how to do that, like [this one](https://neptune.ai/blog/how-to-train-your-own-object-detector-using-tensorflow-object-detection-api). Finally, if you have a GPU available, follow this instructions to setup [TensorFlow on GPU](https://www.tensorflow.org/install/pip#windows-native_1).
 
 ## Using the trained models
 
@@ -120,7 +120,7 @@ If everything worked fine, you'll see your detections:
 
 After the model inference, a file called "output.avi" is produced with the detection results.
 
-## **Train, test and export new models**
+## **Train, test, and export new models**
 
 As mentioned above, the training, evaluation, and export of the object detection models were made using TF object detection API. After cloning the repository and installing the dependencies, the training can be done with the following command:
 
@@ -136,7 +136,7 @@ python models/research/object_detection/model_main_tf2.py \
 
 Where the main arguments are:
 
-- **pipeline_config_path**: Path of the pipeline file (.config). Use one of the pipeline files inside src/utils/pipelines to have similar results than reported in this research.
+- **pipeline_config_path**: Path of the pipeline file (.config). Use one of the pipeline files inside src/utils/pipelines to have similar results to those reported in this research.
 - **model_dir**: Path of the folder to save the model checkpoint.
 - **num_train_steps & num_eval_steps**: Number of steps to train and evaluate the model. Each step represents a batch of data.
 
@@ -165,4 +165,4 @@ python models/research/object_detection/exporter_main_v2.py \
 
 ## Doubts and contribution
 
-If you have any doubt or trouble when using this project, open a new issue on this GitHub repository, or send an e-mail to <alvaroleandro250@gmail.com>. Also, contributions are always welcome, feel free to open an pull request or give any suggestion on how to improve this project.
+If you have any doubts or trouble when using this project, open a new issue on this GitHub repository, or send an e-mail to <alvaroleandro250@gmail.com>. Also, contributions are always welcome, feel free to open a pull request or give any suggestions on how to improve this project.
