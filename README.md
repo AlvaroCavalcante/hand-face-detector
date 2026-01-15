@@ -20,7 +20,7 @@ The dataset was split according to the [Chalearn](https://chalearnlap.cvc.uab.ca
 
 ## Downloading the dataset and pre-trained models
 
-You can download the dataset and pre-trained models in this [link](https://drive.google.com/drive/folders/1cKV8GuqBgVMhf_pAiWu-3zmuNdYcA7Dg?usp=sharing). It's just necessary to ask for permission to use a Google account, and I will share the dataset with you as soon as possible.
+You can download the dataset and pre-trained models in this [link](https://cloud.camerarecall.tech/apps/files/files/1294?dir=/hand_face_detector_dataset&opendetails=true).
 
 The folder "**saved_models.zip**" contains each of the models trained in this research. As the name suggests, the models were saved using the [SavedModel](https://www.tensorflow.org/guide/saved_model) format. The folder "**hand_face_detection_dataset.zip**", on the other hand, contains all the images and labels, totaling around 26 GB of data. The folder structure is as follows:
 
@@ -91,11 +91,11 @@ The project was developed using Python 3.8, but it's probably compatible with ne
 pip install -r requirements.txt
 ```
 
-If you want to retrain the models, you'll also need to install the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection). There are some great tutorials on how to do that, like [this one](https://neptune.ai/blog/how-to-train-your-own-object-detector-using-tensorflow-object-detection-api). Finally, if you have a GPU available, follow this instructions to setup [TensorFlow on GPU](https://www.tensorflow.org/install/pip#windows-native_1).
+If you want to retrain the models, you'll also need to install the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection). There are some great tutorials on how to do that, like [this one](https://neptune.ai/blog/how-to-train-your-own-object-detector-using-tensorflow-object-detection-api). Finally, if you have a GPU available, follow these instructions to setup [TensorFlow on GPU](https://www.tensorflow.org/install/pip#windows-native_1).
 
 ## Using the trained models
 
-You can use the **hand_face_detection.py** script to find the model that better works for you. To run the code, use the following arguments:
+You can use the **hand_face_detection.py** script to find the model that works better for you. To run the code, use the following arguments:
 
 - **saved_model_path**: Path of the saved_model folder that contains the *saved_model.pb* file.
 - **source_path**: Path of the video file to test the model. The default behavior is to use the webcam stream. There is a benchmarking video inside *utils/test_videos* folder that can be used to test the models.
